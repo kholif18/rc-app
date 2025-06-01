@@ -16,252 +16,217 @@
 @section('content')
 <div class="card">
     <div class="container-fluid py-4">
-        <div class="row mb-4">
+        <div class="row mb-2">
             <div class="col-md-6">
-                <h2><i class="fas fa-plus-circle me-2"></i>Tambah Order Baru</h2>
-                <p class="text-muted">Formulir untuk menambahkan order jasa ketik, desain, dan percetakan</p>
+                <h2><i class="fas fa-clipboard-list me-2"></i>Manajemen Order</h2>
+                <p class="text-muted">Daftar semua order jasa ketik, desain, dan percetakan</p>
             </div>
             <div class="col-md-6 text-end">
-                <button class="btn btn-outline-secondary" onclick="history.back()">
-                    <i class="fas fa-arrow-left me-2"></i>Kembali
+                <button class="btn btn-primary" onclick="location.href='tambah-order.html'">
+                    <i class="fas fa-plus-circle me-2"></i>Tambah Order Baru
                 </button>
             </div>
         </div>
 
-        <form id="orderForm">
+        <!-- Filter dan Pencarian -->
+        <div class="card mb-4">
             <div class="row">
-                <!-- Data Pelanggan -->
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header bg-primary text-white">
-                            <h5 class="card-title mb-0"><i class="fas fa-user me-2"></i>Data Pelanggan</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <label for="customerName" class="form-label">Nama Pelanggan</label>
-                                <input type="text" class="form-control" id="customerName" required>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="customerPhone" class="form-label">No. Telepon</label>
-                                    <input type="tel" class="form-control" id="customerPhone" required>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="customerEmail" class="form-label">Email (opsional)</label>
-                                    <input type="email" class="form-control" id="customerEmail">
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <label for="customerAddress" class="form-label">Alamat (opsional)</label>
-                                <textarea class="form-control" id="customerAddress" rows="2"></textarea>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Upload File -->
-                    <div class="card mt-4">
-                        <div class="card-header bg-info text-white">
-                            <h5 class="card-title mb-0"><i class="fas fa-file-upload me-2"></i>Upload File</h5>
-                        </div>
-                        <div class="card-body">
-                            <div id="fileUploadArea" class="file-upload-area">
-                                <i class="fas fa-cloud-upload-alt fa-3x mb-3 text-muted"></i>
-                                <h5>Seret file ke sini atau klik untuk memilih</h5>
-                                <p class="text-muted">Format file: DOC, DOCX, PDF, JPG, PNG, PSD, AI (Maks. 10MB)</p>
-                                <input type="file" id="fileInput" multiple style="display: none;">
-                            </div>
-                            <div id="filePreview" class="file-preview">
-                                <!-- File yang diupload akan muncul di sini -->
-                            </div>
-                        </div>
+                <div class="col-md-4 mb-3 mb-md-0">
+                    <label for="searchInput" class="form-label">Cari Order</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="searchInput" placeholder="Cari berdasarkan no. order/nama...">
+                        <button class="btn btn-outline-secondary" type="button">
+                            <i class="fas fa-search"></i>
+                        </button>
                     </div>
                 </div>
-
-                <!-- Detail Order -->
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header bg-success text-white">
-                            <h5 class="card-title mb-0"><i class="fas fa-clipboard-list me-2"></i>Detail Order</h5>
-                        </div>
-                        <div class="card-body">
-                            <!-- Jenis Layanan -->
-                            <div class="mb-4">
-                                <label class="form-label">Jenis Layanan</label>
-                                <div class="form-check">
-                                    <input class="form-check-input service-checkbox" type="checkbox" id="serviceATK" value="ATK">
-                                    <label class="form-check-label" for="serviceATK">
-                                        <span class="service-tag service-atk"><i class="fas fa-pencil-ruler me-1"></i>ATK</span>
-                                    </label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input service-checkbox" type="checkbox" id="serviceKetik" value="Ketik">
-                                    <label class="form-check-label" for="serviceKetik">
-                                        <span class="service-tag service-ketik"><i class="fas fa-keyboard me-1"></i>Ketik Dokumen</span>
-                                    </label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input service-checkbox" type="checkbox" id="serviceDesain" value="Desain">
-                                    <label class="form-check-label" for="serviceDesain">
-                                        <span class="service-tag service-desain"><i class="fas fa-palette me-1"></i>Desain Grafis</span>
-                                    </label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input service-checkbox" type="checkbox" id="serviceCetak" value="Cetak">
-                                    <label class="form-check-label" for="serviceCetak">
-                                        <span class="service-tag service-cetak"><i class="fas fa-print me-1"></i>Percetakan</span>
-                                    </label>
-                                </div>
-                            </div>
-
-                            <!-- Detail Layanan -->
-                            <div id="serviceDetails" class="mb-4">
-                                <!-- Detail akan muncul berdasarkan jenis layanan yang dipilih -->
-                                <div id="atkDetails" class="service-detail" style="display: none;">
-                                    <div class="mb-3">
-                                        <label for="atkType" class="form-label">Jenis ATK</label>
-                                        <select class="form-select" id="atkType">
-                                            <option selected disabled>Pilih jenis ATK</option>
-                                            <option>Amplop</option>
-                                            <option>Map Folder</option>
-                                            <option>Buku Nota</option>
-                                            <option>Alat Tulis</option>
-                                            <option>Lainnya</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div id="ketikDetails" class="service-detail" style="display: none;">
-                                    <div class="mb-3">
-                                        <label for="docType" class="form-label">Jenis Dokumen</label>
-                                        <select class="form-select" id="docType">
-                                            <option selected disabled>Pilih jenis dokumen</option>
-                                            <option>Surat</option>
-                                            <option>Makalah</option>
-                                            <option>Skripsi/Tesis</option>
-                                            <option>Laporan</option>
-                                            <option>Lainnya</option>
-                                        </select>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="pageCount" class="form-label">Perkiraan Jumlah Halaman</label>
-                                        <input type="number" class="form-control" id="pageCount" min="1">
-                                    </div>
-                                </div>
-
-                                <div id="desainDetails" class="service-detail" style="display: none;">
-                                    <div class="mb-3">
-                                        <label for="designType" class="form-label">Jenis Desain</label>
-                                        <select class="form-select" id="designType">
-                                            <option selected disabled>Pilih jenis desain</option>
-                                            <option>Logo</option>
-                                            <option>Brosur</option>
-                                            <option>Poster</option>
-                                            <option>Spanduk</option>
-                                            <option>Kartu Nama</option>
-                                            <option>Undangan</option>
-                                        </select>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="designSize" class="form-label">Ukuran Desain</label>
-                                        <input type="text" class="form-control" id="designSize" placeholder="Contoh: A4, 50x120cm">
-                                    </div>
-                                </div>
-
-                                <div id="cetakDetails" class="service-detail" style="display: none;">
-                                    <div class="mb-3">
-                                        <label for="printType" class="form-label">Jenis Cetakan</label>
-                                        <select class="form-select" id="printType">
-                                            <option selected disabled>Pilih jenis cetakan</option>
-                                            <option>Brosur</option>
-                                            <option>Poster</option>
-                                            <option>Spanduk</option>
-                                            <option>Stiker</option>
-                                            <option>Undangan</option>
-                                            <option>Kartu Nama</option>
-                                        </select>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label for="printQuantity" class="form-label">Jumlah Cetak</label>
-                                            <input type="number" class="form-control" id="printQuantity" min="1" value="1">
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label for="printMaterial" class="form-label">Bahan</label>
-                                            <select class="form-select" id="printMaterial">
-                                                <option selected disabled>Pilih bahan</option>
-                                                <option>Art Paper</option>
-                                                <option>HVS</option>
-                                                <option>Vinyl</option>
-                                                <option>Canvas</option>
-                                                <option>Lainnya</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Deadline & Estimasi -->
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label for="deadline" class="form-label">Deadline Penyelesaian</label>
-                                    <input type="datetime-local" class="form-control" id="deadline" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="estimateTime" class="form-label">Estimasi Pengerjaan</label>
-                                    <select class="form-select" id="estimateTime">
-                                        <option value="1">1 Hari</option>
-                                        <option value="2">2 Hari</option>
-                                        <option value="3" selected>3 Hari</option>
-                                        <option value="5">5 Hari</option>
-                                        <option value="7">1 Minggu</option>
-                                        <option value="14">2 Minggu</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <!-- Status & Prioritas -->
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label for="orderStatus" class="form-label">Status Order</label>
-                                    <select class="form-select" id="orderStatus">
-                                        <option value="Menunggu" selected>Menunggu</option>
-                                        <option value="Dikerjakan">Dikerjakan</option>
-                                        <option value="Selesai">Selesai</option>
-                                        <option value="Diambil">Diambil</option>
-                                        <option value="Batal">Batal</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="priority" class="form-label">Prioritas</label>
-                                    <select class="form-select" id="priority">
-                                        <option value="normal" selected>Normal</option>
-                                        <option value="high">Prioritas Tinggi</option>
-                                        <option value="express">Express (+50% biaya)</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <!-- Catatan Khusus -->
-                            <div class="mb-3">
-                                <label for="specialNotes" class="form-label">Catatan Khusus</label>
-                                <textarea class="form-control" id="specialNotes" rows="3" placeholder="Masukkan catatan khusus untuk order ini..."></textarea>
-                            </div>
-                        </div>
+                <div class="col-md-4 mb-3 mb-md-0">
+                    <label class="form-label">Filter Status</label>
+                    <div class="btn-group w-100">
+                        <button type="button" class="btn btn-sm btn-outline-secondary filter-status active" data-status="all">Semua</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary filter-status" data-status="Menunggu">Menunggu</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary filter-status" data-status="Dikerjakan">Proses</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary filter-status" data-status="Selesai">Selesai</button>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Filter Layanan</label>
+                    <div class="btn-group w-100">
+                        <button type="button" class="btn btn-sm btn-outline-secondary filter-service active" data-service="all">Semua</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary filter-service" data-service="Ketik">Ketik</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary filter-service" data-service="Desain">Desain</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary filter-service" data-service="Cetak">Cetak</button>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="row mt-3">
-                <div class="col-md-12 text-end">
-                    <button type="button" class="btn btn-secondary me-2">
-                        <i class="fas fa-times me-1"></i> Batal
-                    </button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save me-1"></i> Simpan Order
-                    </button>
+        <div class="card">
+            <div class="card-header">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h5 class="section-title mb-0"><i class="fas fa-list me-2"></i>Daftar Order</h5>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <div class="dropdown d-inline-block me-2">
+                            <button class="btn btn-sm btn-outline-light dropdown-toggle" type="button" id="sortDropdown" data-bs-toggle="dropdown">
+                                <i class="fas fa-sort me-1"></i>Urutkan
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item sort-option" href="#" data-sort="deadline-asc">Deadline (Terdekat)</a></li>
+                                <li><a class="dropdown-item sort-option" href="#" data-sort="deadline-desc">Deadline (Terjauh)</a></li>
+                                <li><a class="dropdown-item sort-option" href="#" data-sort="date-desc">Terbaru</a></li>
+                                <li><a class="dropdown-item sort-option" href="#" data-sort="date-asc">Terlama</a></li>
+                            </ul>
+                        </div>
+                        <span class="badge bg-light text-dark">
+                            Total: 24 order
+                        </span>
+                    </div>
                 </div>
             </div>
-        </form>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th width="120">No. Order</th>
+                                <th width="150">Tanggal</th>
+                                <th>Pelanggan</th>
+                                <th width="150">Layanan</th>
+                                <th width="150">Deadline</th>
+                                <th width="120">Status</th>
+                                <th width="80">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Order 1 -->
+                            <tr class="order-row urgent" onclick="window.location='detail-order.html?id=PRT-2023-101'">
+                                <td>PRT-2023-101</td>
+                                <td>30 Mei 2023</td>
+                                <td>
+                                    <div class="fw-bold">Budi Santoso</div>
+                                    <div class="text-muted small">Ketik Skripsi Bab 1-3</div>
+                                </td>
+                                <td><span class="service-tag service-ketik"><i class="fas fa-keyboard me-1"></i>Ketik</span></td>
+                                <td>
+                                    <div class="fw-bold">1 Jun 2023</div>
+                                    <div class="text-danger small"><i class="fas fa-exclamation-circle me-1"></i>2 hari lagi</div>
+                                </td>
+                                <td><span class="service-tag status-progress"><i class="fas fa-spinner me-1"></i>Dikerjakan</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="event.stopPropagation();">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            
+                            <!-- Order 2 -->
+                            <tr class="order-row" onclick="window.location='detail-order.html?id=PRT-2023-102'">
+                                <td>PRT-2023-102</td>
+                                <td>29 Mei 2023</td>
+                                <td>
+                                    <div class="fw-bold">Siti Aminah</div>
+                                    <div class="text-muted small">Desain Logo Perusahaan</div>
+                                </td>
+                                <td><span class="service-tag service-desain"><i class="fas fa-palette me-1"></i>Desain</span></td>
+                                <td>
+                                    <div class="fw-bold">5 Jun 2023</div>
+                                    <div class="text-success small">6 hari lagi</div>
+                                </td>
+                                <td><span class="service-tag status-waiting"><i class="fas fa-clock me-1"></i>Menunggu</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="event.stopPropagation();">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            
+                            <!-- Order 3 -->
+                            <tr class="order-row priority-express" onclick="window.location='detail-order.html?id=PRT-2023-103'">
+                                <td>PRT-2023-103</td>
+                                <td>28 Mei 2023</td>
+                                <td>
+                                    <div class="fw-bold">Andi Wijaya</div>
+                                    <div class="text-muted small">Cetak Banner Promosi</div>
+                                </td>
+                                <td><span class="service-tag service-cetak"><i class="fas fa-print me-1"></i>Cetak</span></td>
+                                <td>
+                                    <div class="fw-bold">31 Mei 2023</div>
+                                    <div class="text-warning small"><i class="fas fa-clock me-1"></i>Besok</div>
+                                </td>
+                                <td><span class="service-tag status-progress"><i class="fas fa-spinner me-1"></i>Dikerjakan</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="event.stopPropagation();">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            
+                            <!-- Order 4 -->
+                            <tr class="order-row" onclick="window.location='detail-order.html?id=PRT-2023-104'">
+                                <td>PRT-2023-104</td>
+                                <td>27 Mei 2023</td>
+                                <td>
+                                    <div class="fw-bold">Dewi Lestari</div>
+                                    <div class="text-muted small">Paket Komplit (Desain+Cetak)</div>
+                                </td>
+                                <td>
+                                    <span class="service-tag service-desain"><i class="fas fa-palette me-1"></i>Desain</span>
+                                    <span class="service-tag service-cetak"><i class="fas fa-print me-1"></i>Cetak</span>
+                                </td>
+                                <td>
+                                    <div class="fw-bold">2 Jun 2023</div>
+                                    <div class="text-success small">3 hari lagi</div>
+                                </td>
+                                <td><span class="service-tag status-waiting"><i class="fas fa-clock me-1"></i>Menunggu</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="event.stopPropagation();">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            
+                            <!-- Order 5 -->
+                            <tr class="order-row" onclick="window.location='detail-order.html?id=PRT-2023-105'">
+                                <td>PRT-2023-105</td>
+                                <td>26 Mei 2023</td>
+                                <td>
+                                    <div class="fw-bold">Rina Melati</div>
+                                    <div class="text-muted small">Ketik Laporan Keuangan</div>
+                                </td>
+                                <td><span class="service-tag service-ketik"><i class="fas fa-keyboard me-1"></i>Ketik</span></td>
+                                <td>
+                                    <div class="fw-bold">28 Mei 2023</div>
+                                    <div class="text-muted small"><i class="fas fa-check-circle me-1"></i>Selesai</div>
+                                </td>
+                                <td><span class="service-tag status-completed"><i class="fas fa-check-circle me-1"></i>Selesai</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="event.stopPropagation();">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center mb-0">
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" tabindex="-1">Previous</a>
+                        </li>
+                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                        <li class="page-item">
+                            <a class="page-link" href="#">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
     </div>
 </div>
 @endsection

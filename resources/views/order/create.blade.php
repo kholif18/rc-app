@@ -21,7 +21,7 @@
     <div class="container-fluid py-4">
         <div class="row mb-4">
             <div class="col-md-6">
-                <h2><i class="bx bx-plus-circle me-2"></i>Tambah Order Baru</h2>
+                <h2>Tambah Order Baru</h2>
             </div>
             <div class="col-md-6 text-end">
                 <button class="btn btn-outline-secondary" onclick="history.back()">
@@ -35,7 +35,7 @@
                 <!-- Data Pelanggan -->
                 <div class="col-md-6">
                     <div class="card shadow-none bg-transparent border border-success">
-                        <h5 class="section-title mb-0"><i class="bx bx-user me-2"></i>Data Pelanggan</h5>
+                        <h5 class="section-title mb-4"><i class="bx bx-user me-2"></i>Data Pelanggan</h5>
                         <form action="{{ route('order.store') }}" method="POST">
                             @csrf
                             <div class="mb-3">
@@ -54,17 +54,15 @@
 
                     <!-- Upload File -->
                     <div class="card shadow-none bg-transparent border border-info mt-4">
-                        <h5 class="card-header mb-0"><i class="bx bx-upload me-2"></i>Upload File</h5>
-                        <div class="card-body">
-                            <div id="fileUploadArea" class="file-upload-area">
-                                <i class="bx bx-cloud-upload fa-3x mb-3 text-muted"></i>
-                                <h5>Seret file ke sini atau klik untuk memilih</h5>
-                                <p class="text-muted">Format file: DOC, DOCX, PDF, JPG, PNG, PSD, AI (Maks. 10MB)</p>
-                                <input type="file" id="fileInput" multiple style="display: none;">
-                            </div>
-                            <div id="filePreview" class="file-preview">
-                                <!-- File yang diupload akan muncul di sini -->
-                            </div>
+                        <h5 class="section-title mb-3"><i class="bx bx-upload me-2"></i>Upload File</h5>
+                        <div id="fileUploadArea" class="file-upload-area">
+                            <i class="bx bx-cloud-upload fa-3x mb-3 text-muted"></i>
+                            <h5>Seret file ke sini atau klik untuk memilih</h5>
+                            <p class="text-muted">Format file: DOC, DOCX, PDF, JPG, PNG, PSD, AI (Maks. 10MB)</p>
+                            <input type="file" id="fileInput" multiple style="display: none;">
+                        </div>
+                        <div id="filePreview" class="file-preview">
+                            <!-- File yang diupload akan muncul di sini -->
                         </div>
                     </div>
                 </div>
@@ -72,16 +70,10 @@
                 <!-- Detail Order -->
                 <div class="col-md-6">
                     <div class="card shadow-none bg-transparent border border-primary">
-                        <h5 class="section-title mb-0"><i class="bx bx-clipboard me-2"></i>Detail Order</h5>
+                        <h5 class="section-title mb-3"><i class="bx bx-clipboard me-2"></i>Detail Order</h5>
                         <!-- Jenis Layanan -->
                         <div class="mb-4">
                             <label class="form-label d-block">Jenis Layanan</label>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input service-checkbox" type="checkbox" id="serviceATK" value="ATK">
-                                <label class="form-check-label" for="serviceATK">
-                                    <span class="service-tag service-atk"><i class="bx bx-pencil me-1"></i>ATK</span>
-                                </label>
-                            </div>
                             <div class="form-check form-check-inline">
                                 <input class="form-check-input service-checkbox" type="checkbox" id="serviceKetik" value="Ketik">
                                 <label class="form-check-label" for="serviceKetik">
@@ -244,7 +236,7 @@
                     <button type="button" class="btn btn-secondary me-2">
                         Batal
                     </button>
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" class="btn btn-primary"><i class="bx "></i>
                         Simpan Order
                     </button>
                 </div>
@@ -286,13 +278,13 @@
                     
                     const fileIcon = document.createElement('i');
                     if (file.type.includes('image')) {
-                        fileIcon.className = 'fas fa-image me-2';
+                        fileIcon.className = 'bx bx-image me-2';
                     } else if (file.type.includes('pdf')) {
-                        fileIcon.className = 'fas fa-file-pdf me-2';
+                        fileIcon.className = 'bx bxs-file-pdf me-2';
                     } else if (file.type.includes('word')) {
-                        fileIcon.className = 'fas fa-file-word me-2';
+                        fileIcon.className = 'bx bx-file me-2';
                     } else {
-                        fileIcon.className = 'fas fa-file me-2';
+                        fileIcon.className = 'bx bx-file me-2';
                     }
                     
                     const fileName = document.createElement('span');

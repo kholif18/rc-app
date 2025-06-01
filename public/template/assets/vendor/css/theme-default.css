@@ -848,10 +848,6 @@ body {
   margin-top: 30px;
 }
 
-.nav-item {
-  margin-bottom: 10px;
-}
-
 .nav-link {
   display: flex;
   align-items: center;
@@ -1114,6 +1110,30 @@ body {
 
 .urgent {
   border-left: 5px solid #dc3545;
+}
+
+.file-upload-area {
+  border: 2px dashed #ced4da;
+  border-radius: 5px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.file-upload-area:hover {
+  border-color: #6c757d;
+  background-color: #f8f9fa;
+}
+.file-preview {
+  margin-top: 15px;
+}
+.file-item {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  background: #f8f9fa;
+  border-radius: 5px;
+  margin-bottom: 5px;
 }
 
 .service-ketik { color: #696cff; }

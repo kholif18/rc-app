@@ -57,43 +57,6 @@ class DebtController extends Controller
             'customers' => $paginated,
             'search' => $search,
         ]);
-        // $search = $request->input('search');
-        // $perPage = 10;
-        // $page = $request->input('page', 1);
-
-        // // Ambil semua data sesuai filter
-        // $query = Customer::whereHas('debts')
-        //     ->when($search, function ($query, $search) {
-        //         $query->where(function($q) use ($search) {
-        //             $q->where('name', 'like', "%{$search}%")
-        //             ->orWhere('phone', 'like', "%{$search}%")
-        //             ->orWhere('address', 'like', "%{$search}%");
-        //         });
-        //     })
-        //     ->with('debts.payments')
-        //     ->get();
-
-        // // Hitung total hutang dikurangi pembayaran
-        // $transformed = $query->map(function ($customer) {
-        //     $totalDebt = $customer->debts->sum('amount');
-        //     $totalPaid = $customer->debts->flatMap->payments->sum('amount');
-        //     $customer->total_debt = $totalDebt - $totalPaid;
-
-        //     return $customer;
-        // })->filter(function ($customer) {
-        //     return $customer->total_debt > 0; // hanya tampilkan yang masih punya hutang
-        // });
-
-        // // Buat paginator manual karena data sudah dimodifikasi
-        // $customers = new LengthAwarePaginator(
-        //     $transformed->forPage($page, $perPage)->values(),
-        //     $transformed->count(),
-        //     $perPage,
-        //     $page,
-        //     ['path' => url()->current(), 'query' => $request->query()]
-        // );
-
-        // return view('debts.index', compact('customers', 'search'));
     }
 
     /**

@@ -935,6 +935,7 @@ body {
 }
 
 .card-title {
+  margin-top: -4rem;
   font-size: 0.9rem;
   color: var(--gray);
   margin-bottom: 10px;
@@ -969,14 +970,14 @@ body {
 }
 
 /* Orders Section */
-.section-title {
+/* .section-title {
   font-size: 1.2rem;
   font-weight: 600;
   margin-bottom: 15px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-}
+} */
 
 .see-all {
   font-size: 0.9rem;
@@ -1105,6 +1106,7 @@ body {
 }
 
 .summary-icon i {
+  float: right;
   font-size: 3.5rem;
   display: inline-block;
   margin-bottom: 0.5rem;

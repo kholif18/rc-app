@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DebtController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\BackupController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\PaymentController;
@@ -18,6 +19,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('users', UserController::class);
     Route::resource('customers', CustomerController::class);
     Route::resource('debts', DebtController::class);
+    
+    Route::resource('order', OrderController::class);
     
     // Payments
     Route::resource('payments', PaymentController::class)->only(['create', 'store']);

@@ -187,18 +187,12 @@
                         <i class="fas fa-times-circle me-1"></i> Batalkan Order
                     </button>
 
-                    {{-- <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#cancelModal">
-                        <i class="fas fa-times-circle me-1"></i>Batalkan Order
-                    </button> --}}
                     <div>
                         <button type="button" class="btn btn-success"
                                 data-bs-toggle="modal" data-bs-target="#statusModal"
                                 @if($order->status === 'Batal') disabled @endif>
                             <i class="fas fa-edit me-1"></i> Update Status
                         </button>
-                        {{-- <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#statusModal">
-                            <i class="fas fa-sync-alt me-1"></i>Update Status
-                        </button> --}}
                     </div>
                 </div>
             </div>
@@ -224,7 +218,8 @@
                     </div>
 
                     {{-- Timeline progres dari paling lama ke paling baru --}}
-                    @foreach($order->progress()->oldest()->get() as $progress)
+                    {{-- @foreach($order->progress()->oldest()->get() as $progress) --}}
+                    @foreach($order->progress->sortBy('created_at') as $progress)
                         <div class="timeline-item">
                             <h6>
                                 @if ($progress->status == 'Menunggu')
@@ -242,7 +237,19 @@
                                 @endif
                             </h6>
                             <p class="text-muted small mb-1">{{ \Carbon\Carbon::parse($progress->created_at)->format('d M Y, H:i') }}</p>
-                            <p class="small">{{ $progress->note }}</p>
+                            {{-- <p class="small">{{ $progress->note }}
+                                {{ $progress->user->name ?? 'Admin' }}
+                                @if($progress->user)
+                                    ({{ $progress->user->role }})
+                                @endif
+                            </p> --}}
+                                <p class="small">
+                                    {{ $progress->note }}
+                                    {{ $progress->user->name ?? 'Admin' }}
+                                    @if($progress->user)
+                                        ({{ $progress->user->role }})
+                                    @endif
+                                </p>
                         </div>
                     @endforeach
                 </div>

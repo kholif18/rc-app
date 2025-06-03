@@ -72,27 +72,6 @@
     </div>
 @endsection
 
-<!-- Modal -->
-<div class="modal fade" id="customerModal" tabindex="-1" aria-labelledby="customerModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-        <div class="modal-header">
-            <h5 class="modal-title" id="customerModalLabel">Pilih Pelanggan</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
-        </div>
-        <div class="modal-body">
-            <select id="select_customer" class="form-control select2" style="width: 100%;">
-                <option value="">-- Pilih Pelanggan --</option>
-                @foreach ($customers as $customer)
-                    <option value="{{ $customer->id }}">{{ $customer->name }}</option>
-                @endforeach
-            </select>
-        </div>
-        </div>
-    </div>
-</div>
-
-
 @push('scripts')
     <script>
         $(document).ready(function() {

@@ -161,11 +161,18 @@ class OrderController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Order $order)
-    {
-        return view('order.show', compact('order'));
-    }
+    // public function show(Order $order)
+    // {
+    //     return view('order.show', compact('order'));
+    // }
 
+    public function show($orderId)
+    {
+        $order = Order::with(['progress.user'])->findOrFail($orderId);
+        $progresses = $order->progress()->with('user')->orderBy('created_at', 'desc')->get();
+
+        return view('order.show', compact('order', 'progresses'));
+    }
     /**
      * Show the form for editing the specified resource.
      */
@@ -211,6 +218,7 @@ class OrderController extends Controller
         $order->progress()->create([
             'status' => $request->status,
             'note' => $request->note,
+            'user_id' => Auth::id(), 
         ]);
 
         return redirect()->back()->with('success', 'Status dan catatan progress berhasil diperbarui.');

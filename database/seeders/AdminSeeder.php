@@ -16,11 +16,41 @@ class AdminSeeder extends Seeder
     {
         User::create([
             'name' => 'Admin',
-            'username' => 'admin',
-            'email' => 'admin@example.com',
+            'username' => 'superadmin',
+            'email' => 'superadmin@example.com',
             'role' => 'superadmin', // atau 'admin' sesuai kebutuhan
             'email_verified_at' => now(),
             'password' => Hash::make('admin'),
+        ]);
+
+        // Admin
+        User::create([
+            'name' => 'Admin User',
+            'username' => 'admin',
+            'email' => 'admin@example.com',
+            'role' => 'admin',
+            'email_verified_at' => now(),
+            'password' => Hash::make('password'),
+        ]);
+
+        // User 1
+        User::create([
+            'name' => 'Regular User 1',
+            'username' => 'user1',
+            'email' => 'user1@example.com',
+            'role' => 'user',
+            'email_verified_at' => now(),
+            'password' => Hash::make('password'),
+        ]);
+
+        // User 2
+        User::create([
+            'name' => 'Regular User 2',
+            'username' => 'user2',
+            'email' => 'user2@example.com',
+            'role' => 'user',
+            'email_verified_at' => now(),
+            'password' => Hash::make('password'),
         ]);
     }
 }

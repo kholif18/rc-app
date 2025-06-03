@@ -36,7 +36,7 @@
                     <h5 class="section-title mb-4"><i class="bx bx-user me-2"></i>Data Pelanggan</h5>
                     <div class="mb-3">
                         <label for="customer_id" class="form-label">Pelanggan</label>
-                        <select name="customer_id" id="customer_id" class="form-select" required>
+                        <select name="customer_id" id="customer_id" class="form-select select2" required>
                             @foreach ($customers as $customer)
                                 <option value="{{ $customer->id }}" {{ old('customer_id') == $customer->id ? 'selected' : '' }}>{{ $customer->name }}</option>
                             @endforeach
@@ -291,5 +291,11 @@
             return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
 
+        $(document).ready(function() {
+            $('#customer_id').select2({
+                placeholder: 'Pilih pelanggan',
+                allowClear: true
+            });
+        });
     </script>
 @endpush

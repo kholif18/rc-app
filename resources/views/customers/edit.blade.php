@@ -75,6 +75,12 @@
                     <label for="phone">No HP</label>
                 </div>
                 <div class="form-floating py-1">
+                    <input type="email" class="form-control" name="email" id="email" placeholder="Ds. Ngluyu"
+                        aria-describedby="floatingInputHelp" required value="{{ old('email', $customer->email) }}"
+                    />
+                    <label for="email">E-mail</label>
+                </div>
+                <div class="form-floating py-1">
                     <input type="text" class="form-control" name="address" id="address" placeholder="Ds. Ngluyu"
                         aria-describedby="floatingInputHelp" required value="{{ old('address', $customer->address) }}"
                     />

@@ -23,11 +23,13 @@
             <h2>Tambah Order Baru</h2>
         </div>
         <div class="col-md-6 text-end">
-            <a class="btn btn-secondary" href="{{ route('order.index') }}"><i class="bx bx-arrow-to-left me-2"></i>Kembali</a>
+            <button class="btn btn-outline-secondary" onclick="history.back()">
+                <i class="bx bx-arrow-to-left me-2"></i>Kembali
+            </button>
         </div>
     </div>
 
-    <form id="orderForm" action="{{ route('order.store') }}" method="POST" enctype="multipart/form-data">
+    <form id="orderForm" action="{{ route('order.update', $order->id) }}" method="POST" enctype="multipart/form-data">
     @csrf
         <div class="row">
             <!-- Data Pelanggan -->
@@ -38,7 +40,7 @@
                         <label for="customer_id" class="form-label">Pelanggan</label>
                         <select name="customer_id" id="customer_id" class="form-select" required>
                             @foreach ($customers as $customer)
-                                <option value="{{ $customer->id }}" {{ old('customer_id') == $customer->id ? 'selected' : '' }}>{{ $customer->name }}</option>
+                                <option value="{{ $customer->id }}" {{ $order->customer_id == $customer->id ? 'selected' : '' }}>{{ $customer->name }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -67,19 +69,20 @@
                     <div class="mb-4">
                         <label class="form-label d-block">Jenis Layanan</label>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input service-checkbox" type="checkbox" name="services[]" value="Ketik" id="serviceKetik">
+                            <input class="form-check-input service-checkbox" type="checkbox" name="services[]" value="Ketik" id="serviceKetik" {{ in_array('Ketik', $order->services ?? []) ? 'checked' : '' }}>
+                            
                             <label class="form-check-label" for="serviceKetik">
                                 <span class="service-tag service-ketik"><i class="bx bxs-keyboard me-1"></i>Ketik Dokumen</span>
                             </label>
                         </div>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input service-checkbox" type="checkbox" name="services[]" value="Desain" id="serviceDesain">
+                            <input class="form-check-input service-checkbox" type="checkbox" name="services[]" value="Desain" id="serviceDesain" {{ in_array('Desain', $order->services ?? []) ? 'checked' : '' }}>
                             <label class="form-check-label" for="serviceDesain">
                                 <span class="service-tag service-desain"><i class="bx bx-palette me-1"></i>Desain Grafis</span>
                             </label>
                         </div>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input service-checkbox" type="checkbox" name="services[]" value="Cetak" id="serviceCetak">
+                            <input class="form-check-input service-checkbox" type="checkbox" name="services[]" value="Cetak" id="serviceCetak" {{ in_array('Cetak', $order->services ?? []) ? 'checked' : '' }}>
                             <label class="form-check-label" for="serviceCetak">
                                 <span class="service-tag service-cetak"><i class="bx bx-printer me-1"></i>Percetakan</span>
                             </label>
@@ -92,39 +95,39 @@
                         <div id="ketikDetails" class="service-detail" style="display: none;">
                             <div class="mb-3">
                                 <label for="docType" class="form-label">Jenis Dokumen</label>
-                                <input type="text" class="form-control" name="docType" id="docType" placeholder="Jenis Dokument" required>
+                                <input type="text" class="form-control" name="docType" id="docType" placeholder="Jenis Dokument" value="{{ old('docType', $order->docType) }}">
                             </div>
                             <div class="mb-3">
                                 <label for="pageCount" class="form-label">Perkiraan Jumlah Halaman</label>
-                                <input type="number" class="form-control" id="pageCount" name="pageCount" min="1">
+                                <input type="number" class="form-control" id="pageCount" name="pageCount" min="1" value="{{ old('pageCount', $order->pageCount) }}">
                             </div>
                         </div>
 
                         <div id="desainDetails" class="service-detail" style="display: none;">
                             <div class="mb-3">
                                 <label for="designType" class="form-label">Jenis Desain</label>
-                                <input type="text" class="form-control" name="designType" id="designType" name="designType" placeholder="Jenis Desain" required>
+                                <input type="text" class="form-control" name="designType" id="designType" name="designType" placeholder="Jenis Desain" value="{{ old('designType', $order->designType) }}">
                             </div>
                             <div class="mb-3">
                                 <label for="designSize" class="form-label">Ukuran Desain</label>
-                                <input type="text" class="form-control" id="designSize" name="designSize" placeholder="Contoh: A4, 50x120cm">
+                                <input type="text" class="form-control" id="designSize" name="designSize" placeholder="Contoh: A4, 50x120cm" value="{{ old('designSize', $order->designSize) }}">
                             </div>
                         </div>
 
                         <div id="cetakDetails" class="service-detail" style="display: none;">
                             <div class="mb-3">
                                 <label for="printType" class="form-label">Jenis Cetakan</label>
-                                <input type="text" class="form-control" name="printType" id="printType" placeholder="Jenis Cetak" required>
+                                <input type="text" class="form-control" name="printType" id="printType" placeholder="Jenis Cetak" value="{{ old('printType', $order->printType) }}">
 
                             </div>
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label for="printQuantity" class="form-label">Jumlah Cetak</label>
-                                    <input type="number" class="form-control" id="printQuantity" name="printQuantity" min="1" value="1">
+                                    <input type="number" class="form-control" id="printQuantity" name="printQuantity" min="1" value="{{ old('printQuantity', $order->printQuantity) }}">
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label for="printMaterial" class="form-label">Bahan</label>
-                                    <input type="text" class="form-control" name="printMaterial" id="printMaterial" placeholder="Jenis Bahan">
+                                    <input type="text" class="form-control" name="printMaterial" id="printMaterial" placeholder="Jenis Bahan" value="{{ old('printMaterial', $order->printMaterial) }}">
                                 </div>
                             </div>
                         </div>
@@ -134,17 +137,17 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label for="deadline" class="form-label">Deadline Penyelesaian</label>
-                            <input type="datetime-local" class="form-control" id="deadline" name="deadline" required>
+                            <input type="datetime-local" class="form-control" id="deadline" name="deadline" value="{{ \Carbon\Carbon::parse($order->deadline)->format('Y-m-d\TH:i') }}" required>
                         </div>
                         <div class="col-md-6">
                             <label for="estimateTime" class="form-label">Estimasi Pengerjaan</label>
                             <select class="form-select" id="estimateTime" name="estimateTime">
-                                <option value="1">1 Hari</option>
-                                <option value="2">2 Hari</option>
-                                <option value="3" selected>3 Hari</option>
-                                <option value="5">5 Hari</option>
-                                <option value="7">1 Minggu</option>
-                                <option value="14">2 Minggu</option>
+                                <option value="1" {{ $order->estimateTime == 1 ? 'selected' : '' }}>1 Hari</option>
+                                <option value="2" {{ $order->estimateTime == 2 ? 'selected' : '' }}>2 Hari</option>
+                                <option value="3" {{ $order->estimateTime == 3 ? 'selected' : '' }}>3 Hari</option>
+                                <option value="5" {{ $order->estimateTime == 5 ? 'selected' : '' }}>5 Hari</option>
+                                <option value="7" {{ $order->estimateTime == 7 ? 'selected' : '' }}>1 Minggu</option>
+                                <option value="14" {{ $order->estimateTime == 14 ? 'selected' : '' }}>2 Minggu</option>
                             </select>
                         </div>
                     </div>
@@ -154,19 +157,19 @@
                         <div class="col-md-6">
                             <label for="status" class="form-label">Status Order</label>
                             <select class="form-select" id="status" name="status">
-                                <option value="Menunggu" selected>Menunggu</option>
-                                <option value="Dikerjakan">Dikerjakan</option>
-                                <option value="Selesai">Selesai</option>
-                                <option value="Diambil">Diambil</option>
-                                <option value="Batal">Batal</option>
+                                <option value="Menunggu" {{ $order->status == 'Menunggu' ? 'selected' : '' }}>Menunggu</option>
+                                <option value="Dikerjakan {{ $order->status == 'Dikerjakan' ? 'selected' : '' }}">Dikerjakan</option>
+                                <option value="Selesai" {{ $order->status == 'Selesai' ? 'selected' : '' }}>Selesai</option>
+                                <option value="Diambil" {{ $order->status == 'Diambil' ? 'selected' : '' }}>Diambil</option>
+                                <option value="Batal" {{ $order->status == 'Batal' ? 'selected' : '' }}>Batal</option>
                             </select>
                         </div>
                         <div class="col-md-6">
                             <label for="priority" class="form-label">Prioritas</label>
                             <select class="form-select" id="priority" name="priority">
-                                <option value="normal" selected>Normal</option>
-                                <option value="high">Prioritas Tinggi</option>
-                                <option value="express">Express (+50% biaya)</option>
+                                <option value="normal" {{ $order->priority == 'normal' ? 'selected' : '' }}>Normal</option>
+                                <option value="high" {{ $order->priority == 'high' ? 'selected' : '' }}>Prioritas Tinggi</option>
+                                <option value="express" {{ $order->priority == 'express' ? 'selected' : '' }}>Express (+50% biaya)</option>
                             </select>
                         </div>
                     </div>
@@ -174,7 +177,7 @@
                     <!-- Catatan Khusus -->
                     <div class="mb-3">
                         <label for="specialNotes" class="form-label">Catatan Khusus</label>
-                        <textarea class="form-control" id="specialNotes" name="specialNotes" rows="3" placeholder="Masukkan catatan khusus untuk order ini..."></textarea>
+                        <textarea class="form-control" id="specialNotes" name="specialNotes" rows="3" placeholder="Masukkan catatan khusus untuk order ini...">{{ $order->special_notes ?? '' }}</textarea>
                     </div>
                 </div>
             </div>
@@ -195,55 +198,69 @@
 @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const checkboxes = document.querySelectorAll('.service-checkbox');
+        const checkboxes = document.querySelectorAll('.service-checkbox');
 
-            // Map detail div dan input yang wajib
-            const serviceMap = {
-                serviceKetik: {
-                    detail: document.getElementById('ketikDetails'),
-                    required: ['docType']
-                },
-                serviceDesain: {
-                    detail: document.getElementById('desainDetails'),
-                    required: ['designType']
-                },
-                serviceCetak: {
-                    detail: document.getElementById('cetakDetails'),
-                    required: ['printType', 'printMaterial']
-                }
-            };
-
-            function toggleServiceDetail(checkbox) {
-                const service = serviceMap[checkbox.id];
-                if (!service) return;
-
-                const { detail, required } = service;
-
-                if (checkbox.checked) {
-                    detail.style.display = 'block';
-                    required.forEach(id => {
-                        const input = document.getElementById(id);
-                        if (input) input.setAttribute('required', true);
-                    });
-                } else {
-                    detail.style.display = 'none';
-                    required.forEach(id => {
-                        const input = document.getElementById(id);
-                        if (input) input.removeAttribute('required');
-                    });
-                }
+        // Map detail div dan input yang wajib
+        const serviceMap = {
+            serviceKetik: {
+                detail: document.getElementById('ketikDetails'),
+                required: ['docType']
+            },
+            serviceDesain: {
+                detail: document.getElementById('desainDetails'),
+                required: ['designType']
+            },
+            serviceCetak: {
+                detail: document.getElementById('cetakDetails'),
+                required: ['printType', 'printMaterial']
             }
+        };
 
-            // Pasang event listener ke setiap checkbox
-            checkboxes.forEach(cb => {
-                cb.addEventListener('change', function () {
-                    toggleServiceDetail(cb);
+        function toggleServiceDetail(checkbox) {
+            const service = serviceMap[checkbox.id];
+            if (!service) return;
+
+            const { detail, required } = service;
+
+            if (checkbox.checked) {
+                detail.style.display = 'block';
+                required.forEach(id => {
+                    const input = document.getElementById(id);
+                    if (input) input.setAttribute('required', true);
                 });
+            } else {
+                detail.style.display = 'none';
+                required.forEach(id => {
+                    const input = document.getElementById(id);
+                    if (input) input.removeAttribute('required');
+                });
+            }
+        }
 
-                // Inisialisasi saat halaman dimuat (jika sudah tercentang)
+        // Pasang event listener ke setiap checkbox
+        checkboxes.forEach(cb => {
+            cb.addEventListener('change', function () {
                 toggleServiceDetail(cb);
             });
+
+            // Inisialisasi saat halaman dimuat (jika sudah tercentang)
+            toggleServiceDetail(cb);
         });
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const selectedService = "{{ $order->serviceType ?? '' }}";
+
+        if (selectedService === 'ketik') {
+            document.getElementById('ketikDetails').style.display = 'block';
+        } else if (selectedService === 'desain') {
+            document.getElementById('desainDetails').style.display = 'block';
+        } else if (selectedService === 'cetak') {
+            document.getElementById('cetakDetails').style.display = 'block';
+        }
+    });
+
+        // Handle file upload
         const fileUploadArea = document.getElementById('fileUploadArea');
         const fileInput = document.getElementById('fileInput');
         const filePreview = document.getElementById('filePreview');
@@ -291,5 +308,11 @@
             return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
 
+        // // Form submission
+        // document.getElementById('orderForm').addEventListener('submit', function(e) {
+        //     e.preventDefault();
+        //     alert('Order berhasil disimpan!');
+        //     // Di sini bisa ditambahkan kode untuk mengirim data ke server
+        // });
     </script>
 @endpush

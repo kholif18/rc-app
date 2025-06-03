@@ -15,7 +15,7 @@
 
 @section('content')
     <div class="card">
-        <div class="card-header">Daftar Pelanggan Lunas</div>
+        <h5 class="card-header">Daftar Pelanggan Lunas</h5>
         <div class="card-body">
             <table class="table">
                 <thead>

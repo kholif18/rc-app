@@ -14,14 +14,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        \App\Models\User::create([
-            'name' => 'Admin',
-            'username' => 'admin', // pastikan kolom username sudah ada
-            'email' => 'admin@example.com',
-            'role' => 'superadmin',
-            'password' => Hash::make('admin'), // ganti dengan password aman
-            'email_verified_at' => now(),
+        $this->call([
+            AdminSeeder::class,
         ]);
-        
+
+        $this->call([
+            CustomerSeeder::class,
+        ]);
     }
 }

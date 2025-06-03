@@ -10,6 +10,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\OrderNoteController;
 
 Route::middleware('auth')->group(function () {
     // Route untuk semua user yang terautentikasi
@@ -21,7 +22,10 @@ Route::middleware('auth')->group(function () {
     Route::resource('debts', DebtController::class);
     
     Route::resource('order', OrderController::class);
-    
+    Route::put('/orders/{order}/update-status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
+    Route::put('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+    Route::post('/orders/{order}/notes', [OrderNoteController::class, 'store'])->name('orders.notes.store');
+
     // Payments
     Route::resource('payments', PaymentController::class)->only(['create', 'store']);
     Route::get('/payments/detail', [PaymentController::class, 'detail'])->name('payments.detail');

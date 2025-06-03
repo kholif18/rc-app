@@ -25,39 +25,86 @@
             <li class="menu-item  {{ Request::is('/') ? 'active' : '' }}">
                 <a href="{{ url('/') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-home-circle"></i>
-                <div data-i18n="Analytics">Dashboard</div>
+                <div data-i18n="dashboard">Dashboard</div>
                 </a>
             </li>
 
-            <li class="menu-item  {{ Request::is('customers*') ? 'active' : '' }}">
-                <a href="{{ route('customers.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-user"></i>
-                <div data-i18n="Basic">Customers</div>
+            <li class="menu-header small text-uppercase">
+                <span class="menu-header-text">Manajemen Order</span>
+            </li>
+            
+            <li class="menu-item  {{ Request::is('order*') ? 'active' : '' }}">
+                <a href="{{ route('order.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-clipboard"></i>
+                <div data-i18n="Semua Order">Semua Order</div>
                 </a>
             </li>
 
             <li class="menu-item  {{ Request::is('debts*') ? 'active' : '' }}">
                 <a href="{{ route('debts.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-wallet"></i>
-                <div data-i18n="Basic">Debts</div>
+                <div data-i18n="Debt">Debts</div>
                 </a>
             </li>
 
             <li class="menu-item  {{ Request::is('payments.index*') ? 'active' : '' }}">
                 <a href="{{ route('payments.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-dollar"></i>
-                <div data-i18n="Basic">Lunas</div>
+                <div data-i18n="Lunas">Lunas</div>
                 </a>
             </li>
 
             <li class="menu-header small text-uppercase">
-                <span class="menu-header-text">User Setting</span>
+                <span class="menu-header-text">Master Data</span>
+            </li>
+            
+            <li class="menu-item  {{ Request::is('customers*') ? 'active' : '' }}">
+                <a href="{{ route('customers.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-user"></i>
+                <div data-i18n="Customers">Customers</div>
+                </a>
+            </li>
+            
+            <!-- User interface -->
+            <li class="menu-item {{ Request::is('#*') ? 'active' : '' }}">
+                <a href="#" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons bx bx bx-slider-alt"></i>
+                    <div data-i18n="Pengaturan Layanan">Pengaturan Layanan</div>
+                </a>
+                <ul class="menu-sub">
+                    <li class="menu-item {{ Request::is('#*') ? 'active' : '' }}">
+                        <a href="#" class="menu-link">
+                            <div data-i18n="Daftar Layanan">Daftar Layanan</div>
+                        </a>
+                    </li>
+                    <li class="menu-item {{ Request::is('#*') ? 'active' : '' }}">
+                        <a href="#" class="menu-link">
+                            <div data-i18n="Harga & Paket">Harga & Paket</div>
+                        </a>
+                    </li>
+                    <li class="menu-item {{ Request::is('#*') ? 'active' : '' }}">
+                        <a href="#" class="menu-link">
+                            <div data-i18n="Bahan Cetak">Bahan Cetak</div>
+                        </a>
+                    </li>
+                </ul>
             </li>
 
-            <li class="menu-item  {{ Request::is('users*') ? 'active' : '' }}">
-                <a href="{{ route('users.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-user"></i>
-                <div data-i18n="Basic">User</div>
+            <li class="menu-header small text-uppercase">
+                <span class="menu-header-text">Laporan</span>
+            </li>
+
+            <li class="menu-item  {{ Request::is('reports*') ? 'active' : '' }}">
+                <a href="{{ route('reports.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bxs-report"></i>
+                <div data-i18n="Basic">Reports</div>
+                </a>
+            </li>
+            
+            <li class="menu-item  {{ Request::is('#') ? 'active' : '' }}">
+                <a href="#" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-line-chart"></i>
+                <div data-i18n="Basic">Pendapatan</div>
                 </a>
             </li>
 
@@ -65,10 +112,10 @@
                 <span class="menu-header-text">System Setting</span>
             </li>
 
-            <li class="menu-item  {{ Request::is('reports*') ? 'active' : '' }}">
-                <a href="{{ route('reports.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bxs-report"></i>
-                <div data-i18n="Basic">Reports</div>
+            <li class="menu-item  {{ Request::is('users*') ? 'active' : '' }}">
+                <a href="{{ route('users.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-user"></i>
+                <div data-i18n="Basic">User</div>
                 </a>
             </li>
 
@@ -81,8 +128,8 @@
             
             <li class="menu-item  {{ Request::is('settings*') ? 'active' : '' }}">
                 <a href="{{ route('settings.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-slider"></i>
-                <div data-i18n="Basic">Settings</div>
+                <i class="menu-icon tf-icons bx bxs-cog"></i>
+                <div data-i18n="Basic">System Settings</div>
                 </a>
             </li>
 

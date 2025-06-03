@@ -843,33 +843,6 @@ body {
   gap: 10px;
 }
 
-.nav-menu {
-  list-style: none;
-  margin-top: 30px;
-}
-
-.nav-link {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 15px;
-  border-radius: 8px;
-  color: var(--gray);
-  text-decoration: none;
-  transition: all 0.3s ease-in-out;
-}
-
-.nav-link:hover, .nav-link.active {
-  background-color: rgba(105, 108, 255, 0.1);
-  color: var(--primary);
-}
-
-.nav-link i {
-  width: 20px;
-  text-align: center;
-  font-size: 1.2rem;
-}
-
 /* Main Content */
 
 .header {
@@ -930,12 +903,12 @@ body {
   background-color: var(--danger);
 }
 
-.card-title {
+/* .card-title {
   margin-top: -4rem;
   font-size: 0.9rem;
   color: var(--gray);
   margin-bottom: 10px;
-}
+} */
 
 .card-value {
   font-size: 1.8rem;
@@ -1141,6 +1114,58 @@ body {
 .service-cetak { color: #ffab00; }
 .hutang { color: #ff3e1d; }
 
+.status-badge {
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+}
+.status-waiting { background-color: #e3f2fd; color: #0d47a1; }
+.status-progress { background-color: #fff8e1; color: #ff8f00; }
+.status-completed { background-color: #e8f5e9; color: #2e7d32; }
+.status-cancel { background-color: #fff0ed; color: #ff3e1d; }
+.status-delivered { background-color: #d4d4d4; color: #505050; }
+.priority-high { border-left: 3px solid #c62828; padding-left: 10px; }
+.file-item {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  background: #f8f9fa;
+  border-radius: 5px;
+  margin-bottom: 5px;
+}
+.timeline {
+  position: relative;
+  max-height: 300px;
+  padding-left: 30px;
+  overflow-y: auto;
+}
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 10px;
+  top: 0;
+  width: 2px;
+  background: #dee2e6;
+}
+.timeline-item {
+  position: relative;
+  margin-bottom: 20px;
+}
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -19px;
+  top: 3px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #0d6efd;
+  border: 2px solid white;
+}
+
+.internal-note {
+  max-height: 350px;
+}
 /* Responsive */
 @media (max-width: 1200px) {
   .summary-cards {

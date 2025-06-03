@@ -2,19 +2,74 @@
 
 namespace App\Http\Controllers;
 
+use id;
 use App\Models\Debt;
 use App\Models\Order;
 use App\Models\Customer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
 
 class OrderController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return view('order.index');
+        $query = Order::with('customer');
+
+        // Search berdasarkan nomor order atau nama pelanggan
+        if ($search = $request->input('search')) {
+            $query->where(function($q) use ($search) {
+                $q->where('id', 'like', "%$search%") // asumsi id order berupa string seperti "PRT-2023-101"
+                ->orWhereHas('customer', function($q2) use ($search) {
+                    $q2->where('name', 'like', "%$search%");
+                });
+            });
+        }
+
+        // Filter status
+        if ($status = $request->input('status')) {
+            if ($status !== 'all') {
+                $query->where('status', $status);
+            }
+        }
+
+        // Filter layanan (services) - services disimpan sebagai array JSON
+        if ($service = $request->input('service')) {
+            if ($service !== 'all') {
+                // Cari order yang array 'services' nya mengandung $service
+                $query->whereJsonContains('services', $service);
+            }
+        }
+
+        // Sorting
+        $sort = $request->input('sort', 'date-desc'); // default sort terbaru
+        switch ($sort) {
+            case 'deadline-asc':
+                $query->orderBy('deadline', 'asc');
+                break;
+            case 'deadline-desc':
+                $query->orderBy('deadline', 'desc');
+                break;
+            case 'date-asc':
+                $query->orderBy('created_at', 'asc');
+                break;
+            case 'date-desc':
+            default:
+                $query->orderBy('created_at', 'desc');
+                break;
+        }
+
+        // Pagination 10 per halaman
+        $orders = $query->paginate(10)->withQueryString();
+
+        // Untuk menampilkan total order (bisa dari paginated result)
+        $totalOrders = $orders->total();
+
+        // Kirim data ke view
+        return view('order.index', compact('orders', 'totalOrders'));
     }
 
     /**
@@ -31,20 +86,73 @@ class OrderController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $services = $request->input('services', []);
+
+        $request->validate([
             'customer_id' => 'required|exists:customers,id',
-            'amount' => 'required|numeric|min:0.01',
-            'note' => 'nullable|string',
+            'order_files.*' => 'nullable|file|max:10240',
+            'deadline' => 'required|date',
+            'estimateTime' => 'required|integer',
+            'status' => 'required|string',
+            'priority' => 'required|string',
+            'specialNotes' => 'nullable|string',
+            'services' => 'required|array|min:1',
         ]);
 
-        // BUAT entri hutang baru, bukan update yang lama
-        Debt::create([
-            'customer_id' => $validated['customer_id'],
-            'amount' => $validated['amount'],
-            'note' => $validated['note'],
+        // Validasi tambahan tergantung layanan yang dipilih
+        $customRules = [];
+
+        if (in_array('Ketik', $services)) {
+            $customRules['docType'] = 'required|string';
+            $customRules['pageCount'] = 'required|integer|min:1';
+        }
+
+        if (in_array('Desain', $services)) {
+            $customRules['designType'] = 'required|string';
+            $customRules['designSize'] = 'required|string';
+        }
+
+        if (in_array('Cetak', $services)) {
+            $customRules['printType'] = 'required|string';
+            $customRules['printQuantity'] = 'required|integer|min:1';
+            $customRules['printMaterial'] = 'required|string';
+        }
+
+        $request->validate($customRules);
+
+        $order = Order::create([
+            'user_id'        => Auth::id(), // Menyimpan user yang login
+            'customer_id'    => $request->customer_id,
+            'customer_id'    => $request->customer_id,
+            'services'       => $request->services,
+            'doc_type'       => $request->docType,
+            'page_count'     => $request->pageCount,
+            'design_type'    => $request->designType,
+            'design_size'    => $request->designSize,
+            'print_type'     => $request->printType,
+            'print_quantity' => $request->printQuantity,
+            'print_material' => $request->printMaterial,
+            'deadline'       => $request->deadline,
+            'estimate_time'  => $request->estimateTime,
+            'status'   => $request->status,
+            'priority'       => $request->priority,
+            'special_notes'  => $request->specialNotes,
         ]);
 
-        return redirect()->route('order.index')->with('success', 'Hutang berhasil dicatat.');
+        // File upload
+        if ($request->hasFile('order_files')) {
+            foreach ($request->file('order_files') as $file) {
+                $path = $file->store('order_files', 'public');
+
+                $order->files()->create([
+                    'filename' => 'storage/' . $path,
+                    'name' => $file->getClientOriginalName(),
+                    'size' => $file->getSize(),
+                ]);
+            }
+        }
+
+        return redirect()->route('order.index')->with('success', 'Order berhasil disimpan.');
     }
 
     /**
@@ -52,7 +160,7 @@ class OrderController extends Controller
      */
     public function show(Order $order)
     {
-        //
+        return view('order.show', compact('order'));
     }
 
     /**
@@ -60,7 +168,27 @@ class OrderController extends Controller
      */
     public function edit(Order $order)
     {
-        //
+        $customers = Customer::all();
+        return view('order.edit', compact('order', 'customers'));
+    }
+
+    public function updateStatus(Request $request, Order $order)
+    {
+        $request->validate([
+            'status' => 'required|string',
+            'note' => 'nullable|string',
+        ]);
+
+        // Update status utama di tabel orders
+        $order->update(['status' => $request->status]);
+
+        // Simpan catatan progress ke tabel order_progress
+        $order->progress()->create([
+            'status' => $request->status,
+            'note' => $request->note,
+        ]);
+
+        return redirect()->back()->with('success', 'Status dan catatan progress berhasil diperbarui.');
     }
 
     /**
@@ -71,6 +199,27 @@ class OrderController extends Controller
         //
     }
 
+    public function cancel(Request $request, Order $order)
+    {
+        $request->validate([
+            'cancel_reason' => 'required|string',
+            'cancel_notes' => 'nullable|string',
+        ]);
+
+        // Update status order menjadi Batal
+        $order->update([
+            'status' => 'Batal',
+        ]);
+
+        // Simpan ke order_progress
+        $order->progress()->create([
+            'status' => 'Batal',
+            'note' => 'Alasan: ' . $request->cancel_reason . 
+                    ($request->cancel_notes ? ' - Catatan: ' . $request->cancel_notes : ''),
+        ]);
+
+        return redirect()->back()->with('success', 'Order berhasil dibatalkan.');
+    }
     /**
      * Remove the specified resource from storage.
      */

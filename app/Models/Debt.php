@@ -17,4 +17,9 @@ class Debt extends Model
     {
         return $this->hasMany(Payment::class);
     }
+
+    public function orderFiles()
+    {
+        return $this->hasMany(OrderFile::class);
+    }
 }

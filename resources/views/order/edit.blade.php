@@ -31,6 +31,7 @@
 
     <form id="orderForm" action="{{ route('order.update', $order->id) }}" method="POST" enctype="multipart/form-data">
     @csrf
+    @method('PUT')
         <div class="row">
             <!-- Data Pelanggan -->
             <div class="col-md-6">
@@ -38,11 +39,12 @@
                     <h5 class="section-title mb-4"><i class="bx bx-user me-2"></i>Data Pelanggan</h5>
                     <div class="mb-3">
                         <label for="customer_id" class="form-label">Pelanggan</label>
-                        <select name="customer_id" id="customer_id" class="form-select" required>
+                        <select name="customer_id" id="customer_id" class="form-select" disabled>
                             @foreach ($customers as $customer)
                                 <option value="{{ $customer->id }}" {{ $order->customer_id == $customer->id ? 'selected' : '' }}>{{ $customer->name }}</option>
                             @endforeach
                         </select>
+                        <input type="hidden" name="customer_id" value="{{ $order->customer_id }}">
                     </div>
                 </div>
 
@@ -56,7 +58,27 @@
                         <input type="file" id="fileInput" name="order_files[]" multiple style="display: none;">
                     </div>
                     <div id="filePreview" class="file-preview">
-                        <!-- File yang diupload akan muncul di sini -->
+                        @foreach ($order->files ?? [] as $file)
+                            @php
+                                $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
+                                $icon = match(strtolower($ext)) {
+                                    'pdf' => 'fas fa-file-pdf text-danger',
+                                    'doc', 'docx' => 'fas fa-file-word text-primary',
+                                    'xls', 'xlsx' => 'fas fa-file-excel text-success',
+                                    'jpg', 'jpeg', 'png' => 'fas fa-file-image text-warning',
+                                    default => 'fas fa-file'
+                                };
+                                $sizeMB = number_format($file['size'] / 1048576, 1); // byte to MB
+                            @endphp
+                            <div class="file-item d-flex align-items-center mb-2" data-file-id="{{ $file['id'] }}">
+                                <i class="{{ $icon }} me-2"></i>
+                                <span>{{ $file['name'] }}</span>
+                                <small class="text-muted ms-2">{{ number_format($file['size'] / 1048576, 1) }} MB</small>
+                                <button type="button" class="btn btn-sm btn-danger ms-2 remove-file" title="Hapus file">
+                                    <i class="bx bx-trash"></i>
+                                </button>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
             </div>
@@ -91,43 +113,51 @@
 
                     <!-- Detail Layanan -->
                     <div id="serviceDetails" class="mb-4">
-                        <!-- Detail akan muncul berdasarkan jenis layanan yang dipilih -->
+                        <!-- Ketik Dokumen -->
                         <div id="ketikDetails" class="service-detail" style="display: none;">
                             <div class="mb-3">
                                 <label for="docType" class="form-label">Jenis Dokumen</label>
-                                <input type="text" class="form-control" name="docType" id="docType" placeholder="Jenis Dokument" value="{{ old('docType', $order->docType) }}">
+                                <input type="text" class="form-control" name="docType" id="docType" 
+                                    value="{{ old('docType', $order->docType) }}">
                             </div>
                             <div class="mb-3">
                                 <label for="pageCount" class="form-label">Perkiraan Jumlah Halaman</label>
-                                <input type="number" class="form-control" id="pageCount" name="pageCount" min="1" value="{{ old('pageCount', $order->pageCount) }}">
+                                <input type="number" class="form-control" id="pageCount" name="pageCount" min="1" 
+                                    value="{{ old('pageCount', $order->pageCount) }}">
                             </div>
                         </div>
 
+                        <!-- Desain Grafis -->
                         <div id="desainDetails" class="service-detail" style="display: none;">
                             <div class="mb-3">
                                 <label for="designType" class="form-label">Jenis Desain</label>
-                                <input type="text" class="form-control" name="designType" id="designType" name="designType" placeholder="Jenis Desain" value="{{ old('designType', $order->designType) }}">
+                                <input type="text" class="form-control" name="designType" id="designType" 
+                                    value="{{ old('designType', $order->designType) }}">
                             </div>
                             <div class="mb-3">
                                 <label for="designSize" class="form-label">Ukuran Desain</label>
-                                <input type="text" class="form-control" id="designSize" name="designSize" placeholder="Contoh: A4, 50x120cm" value="{{ old('designSize', $order->designSize) }}">
+                                <input type="text" class="form-control" name="designSize" id="designSize" 
+                                    value="{{ old('designSize', $order->designSize) }}">
                             </div>
                         </div>
 
+                        <!-- Percetakan -->
                         <div id="cetakDetails" class="service-detail" style="display: none;">
                             <div class="mb-3">
                                 <label for="printType" class="form-label">Jenis Cetakan</label>
-                                <input type="text" class="form-control" name="printType" id="printType" placeholder="Jenis Cetak" value="{{ old('printType', $order->printType) }}">
-
+                                <input type="text" class="form-control" name="printType" id="printType" 
+                                    value="{{ old('printType', $order->printType) }}">
                             </div>
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label for="printQuantity" class="form-label">Jumlah Cetak</label>
-                                    <input type="number" class="form-control" id="printQuantity" name="printQuantity" min="1" value="{{ old('printQuantity', $order->printQuantity) }}">
+                                    <input type="number" class="form-control" id="printQuantity" name="printQuantity" min="1" 
+                                        value="{{ old('printQuantity', $order->printQuantity) }}">
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label for="printMaterial" class="form-label">Bahan</label>
-                                    <input type="text" class="form-control" name="printMaterial" id="printMaterial" placeholder="Jenis Bahan" value="{{ old('printMaterial', $order->printMaterial) }}">
+                                    <input type="text" class="form-control" name="printMaterial" id="printMaterial" 
+                                        value="{{ old('printMaterial', $order->printMaterial) }}">
                                 </div>
                             </div>
                         </div>
@@ -142,12 +172,12 @@
                         <div class="col-md-6">
                             <label for="estimateTime" class="form-label">Estimasi Pengerjaan</label>
                             <select class="form-select" id="estimateTime" name="estimateTime">
-                                <option value="1" {{ $order->estimateTime == 1 ? 'selected' : '' }}>1 Hari</option>
-                                <option value="2" {{ $order->estimateTime == 2 ? 'selected' : '' }}>2 Hari</option>
-                                <option value="3" {{ $order->estimateTime == 3 ? 'selected' : '' }}>3 Hari</option>
-                                <option value="5" {{ $order->estimateTime == 5 ? 'selected' : '' }}>5 Hari</option>
-                                <option value="7" {{ $order->estimateTime == 7 ? 'selected' : '' }}>1 Minggu</option>
-                                <option value="14" {{ $order->estimateTime == 14 ? 'selected' : '' }}>2 Minggu</option>
+                                <option value="1" {{ $order->estimate_time == 1 ? 'selected' : '' }}>1 Hari</option>
+                                <option value="2" {{ $order->estimate_time == 2 ? 'selected' : '' }}>2 Hari</option>
+                                <option value="3" {{ $order->estimate_time == 3 ? 'selected' : '' }}>3 Hari</option>
+                                <option value="5" {{ $order->estimate_time == 5 ? 'selected' : '' }}>5 Hari</option>
+                                <option value="7" {{ $order->estimate_time == 7 ? 'selected' : '' }}>1 Minggu</option>
+                                <option value="14" {{ $order->estimate_time == 14 ? 'selected' : '' }}>2 Minggu</option>
                             </select>
                         </div>
                     </div>
@@ -158,7 +188,7 @@
                             <label for="status" class="form-label">Status Order</label>
                             <select class="form-select" id="status" name="status">
                                 <option value="Menunggu" {{ $order->status == 'Menunggu' ? 'selected' : '' }}>Menunggu</option>
-                                <option value="Dikerjakan {{ $order->status == 'Dikerjakan' ? 'selected' : '' }}">Dikerjakan</option>
+                                <option value="Dikerjakan" {{ $order->status == 'Dikerjakan' ? 'selected' : '' }}>Dikerjakan</option>
                                 <option value="Selesai" {{ $order->status == 'Selesai' ? 'selected' : '' }}>Selesai</option>
                                 <option value="Diambil" {{ $order->status == 'Diambil' ? 'selected' : '' }}>Diambil</option>
                                 <option value="Batal" {{ $order->status == 'Batal' ? 'selected' : '' }}>Batal</option>
@@ -197,122 +227,188 @@
 
 @push('scripts')
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-        const checkboxes = document.querySelectorAll('.service-checkbox');
-
-        // Map detail div dan input yang wajib
-        const serviceMap = {
-            serviceKetik: {
-                detail: document.getElementById('ketikDetails'),
-                required: ['docType']
-            },
-            serviceDesain: {
-                detail: document.getElementById('desainDetails'),
-                required: ['designType']
-            },
-            serviceCetak: {
-                detail: document.getElementById('cetakDetails'),
-                required: ['printType', 'printMaterial']
-            }
+        // Data dari database
+        const orderData = {
+            services: @json($order->services ?? []),
+            docType: @json($order->docType ?? ''),
+            pageCount: @json($order->pageCount ?? ''),
+            designType: @json($order->designType ?? ''),
+            designSize: @json($order->designSize ?? ''),
+            printType: @json($order->printType ?? ''),
+            printQuantity: @json($order->printQuantity ?? ''),
+            printMaterial: @json($order->printMaterial ?? '')
         };
 
-        function toggleServiceDetail(checkbox) {
-            const service = serviceMap[checkbox.id];
-            if (!service) return;
-
-            const { detail, required } = service;
-
-            if (checkbox.checked) {
-                detail.style.display = 'block';
-                required.forEach(id => {
-                    const input = document.getElementById(id);
-                    if (input) input.setAttribute('required', true);
-                });
-            } else {
-                detail.style.display = 'none';
-                required.forEach(id => {
-                    const input = document.getElementById(id);
-                    if (input) input.removeAttribute('required');
-                });
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fungsi untuk menampilkan detail layanan
+            function showServiceDetail(service) {
+                const detailElement = document.getElementById(`${service}Details`);
+                if (detailElement) {
+                    detailElement.style.display = 'block';
+                    
+                    // Set required attribute jika diperlukan
+                    const inputs = detailElement.querySelectorAll('input');
+                    inputs.forEach(input => {
+                        input.setAttribute('required', 'required');
+                    });
+                }
             }
-        }
 
-        // Pasang event listener ke setiap checkbox
-        checkboxes.forEach(cb => {
-            cb.addEventListener('change', function () {
-                toggleServiceDetail(cb);
+            // Set checkbox dan tampilkan detail berdasarkan data dari database
+            orderData.services.forEach(service => {
+                const serviceId = service.toLowerCase();
+                const checkbox = document.getElementById(`service${service}`);
+                if (checkbox) {
+                    checkbox.checked = true;
+                    showServiceDetail(serviceId);
+                }
             });
 
-            // Inisialisasi saat halaman dimuat (jika sudah tercentang)
-            toggleServiceDetail(cb);
-        });
-    });
-
-    document.addEventListener("DOMContentLoaded", function () {
-        const selectedService = "{{ $order->serviceType ?? '' }}";
-
-        if (selectedService === 'ketik') {
-            document.getElementById('ketikDetails').style.display = 'block';
-        } else if (selectedService === 'desain') {
-            document.getElementById('desainDetails').style.display = 'block';
-        } else if (selectedService === 'cetak') {
-            document.getElementById('cetakDetails').style.display = 'block';
-        }
-    });
-
-        // Handle file upload
-        const fileUploadArea = document.getElementById('fileUploadArea');
-        const fileInput = document.getElementById('fileInput');
-        const filePreview = document.getElementById('filePreview');
-
-        fileUploadArea.addEventListener('click', () => fileInput.click());
-        
-        fileInput.addEventListener('change', function() {
-            filePreview.innerHTML = '';
-            if (this.files.length > 0) {
-                Array.from(this.files).forEach(file => {
-                    const fileItem = document.createElement('div');
-                    fileItem.className = 'file-item';
+            // Event listener untuk perubahan checkbox
+            document.querySelectorAll('.service-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const service = this.id.replace('service', '').toLowerCase();
+                    const detailElement = document.getElementById(`${service}Details`);
                     
-                    const fileIcon = document.createElement('i');
-                    if (file.type.includes('image')) {
-                        fileIcon.className = 'bx bx-image me-2';
-                    } else if (file.type.includes('pdf')) {
-                        fileIcon.className = 'bx bxs-file-pdf me-2';
-                    } else if (file.type.includes('word')) {
-                        fileIcon.className = 'fas fa-file-word me-2';
+                    if (this.checked) {
+                        detailElement.style.display = 'block';
+                        // Set required attribute
+                        const inputs = detailElement.querySelectorAll('input');
+                        inputs.forEach(input => {
+                            input.setAttribute('required', 'required');
+                        });
                     } else {
-                        fileIcon.className = 'bx bx-file me-2';
+                        detailElement.style.display = 'none';
+                        // Hapus required attribute
+                        const inputs = detailElement.querySelectorAll('input');
+                        inputs.forEach(input => {
+                            input.removeAttribute('required');
+                        });
                     }
-                    
-                    const fileName = document.createElement('span');
-                    fileName.textContent = file.name;
-                    
-                    const fileSize = document.createElement('small');
-                    fileSize.className = 'text-muted ms-2';
-                    fileSize.textContent = formatFileSize(file.size);
-                    
-                    fileItem.appendChild(fileIcon);
-                    fileItem.appendChild(fileName);
-                    fileItem.appendChild(fileSize);
-                    filePreview.appendChild(fileItem);
                 });
-            }
+            });
+
+            // Handle file removal
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('remove-file') || e.target.closest('.remove-file')) {
+                    const fileItem = e.target.closest('.file-item');
+                    if (fileItem) {
+                        // Jika ini file yang sudah ada di database
+                        if (fileItem.dataset.fileId) {
+                            const deleteInput = document.createElement('input');
+                            deleteInput.type = 'hidden';
+                            deleteInput.name = 'deleted_files[]';
+                            deleteInput.value = fileItem.dataset.fileId;
+                            document.getElementById('orderForm').appendChild(deleteInput);
+                        }
+                        fileItem.remove();
+                    }
+                }
+            });
         });
 
-        function formatFileSize(bytes) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        // Elemen-elemen penting
+    const fileUploadArea = document.getElementById('fileUploadArea');
+    const fileInput = document.getElementById('fileInput');
+    const filePreview = document.getElementById('filePreview');
+
+    // Array untuk menyimpan file yang dipilih user
+    let selectedFiles = [];
+
+    // Ketika area diklik, buka file picker
+    fileUploadArea.addEventListener('click', () => fileInput.click());
+
+    // Ketika file dipilih
+    fileInput.addEventListener('change', function() {
+        if (this.files.length > 0) {
+            // Tambahkan file baru ke array
+            Array.from(this.files).forEach(file => {
+                selectedFiles.push(file);
+            });
+
+            // Update preview dan input
+            updateFilePreview();
         }
 
-        // // Form submission
-        // document.getElementById('orderForm').addEventListener('submit', function(e) {
-        //     e.preventDefault();
-        //     alert('Order berhasil disimpan!');
-        //     // Di sini bisa ditambahkan kode untuk mengirim data ke server
-        // });
+        // Reset input agar bisa memilih file yang sama lagi kalau dibutuhkan
+        this.value = '';
+    });
+
+    // Tampilkan preview file
+    function updateFilePreview() {
+        filePreview.innerHTML = '';
+
+        selectedFiles.forEach((file, index) => {
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-item d-flex align-items-center mb-2';
+
+            // Icon file
+            const fileIcon = document.createElement('i');
+            if (file.type.includes('image')) {
+                fileIcon.className = 'bx bx-image me-2';
+            } else if (file.type.includes('pdf')) {
+                fileIcon.className = 'bx bxs-file-pdf me-2 text-danger';
+            } else if (
+                file.type.includes('word') ||
+                file.name.match(/\.(doc|docx)$/i)
+            ) {
+                fileIcon.className = 'bx bxs-file-word me-2 text-primary';
+            } else {
+                fileIcon.className = 'bx bx-file me-2';
+            }
+
+            // Nama file
+            const fileName = document.createElement('span');
+            fileName.textContent = file.name;
+
+            // Ukuran file
+            const fileSize = document.createElement('small');
+            fileSize.className = 'text-muted ms-2';
+            fileSize.textContent = formatFileSize(file.size);
+
+            // Tombol hapus file
+            const closeBtn = document.createElement('button');
+            closeBtn.type = 'button';
+            closeBtn.className = 'btn btn-sm btn-link text-danger ms-2';
+            closeBtn.innerHTML = '<i class="bx bx-x"></i>';
+            closeBtn.title = 'Hapus file';
+            closeBtn.onclick = () => removeFile(index);
+
+            // Susun item
+            fileItem.appendChild(fileIcon);
+            fileItem.appendChild(fileName);
+            fileItem.appendChild(fileSize);
+            fileItem.appendChild(closeBtn);
+
+            filePreview.appendChild(fileItem);
+        });
+
+        // Update input file
+        updateFileInput();
+    }
+
+    // Update input file agar hanya file di selectedFiles yang dikirim
+    function updateFileInput() {
+        const dataTransfer = new DataTransfer();
+        selectedFiles.forEach(file => {
+            dataTransfer.items.add(file);
+        });
+        fileInput.files = dataTransfer.files;
+    }
+
+    // Hapus file dari list
+    function removeFile(index) {
+        selectedFiles.splice(index, 1);
+        updateFilePreview(); // otomatis update input juga
+    }
+
+    // Format ukuran file
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+    }
     </script>
 @endpush

@@ -26,37 +26,54 @@
     </div>
 
     <!-- Filter dan Pencarian -->
-    <div class="card mb-4">
-        <div class="row">
-            <div class="col-md-4 mb-3 mb-md-0">
-                <label for="searchInput" class="form-label">Cari Order</label>
-                <div class="input-group">
-                    <input type="text" class="form-control" id="searchInput" placeholder="Cari berdasarkan no. order/nama...">
-                    <button class="btn btn-outline-primary" type="button">
-                        <i class="fas fa-search"></i>
-                    </button>
+    <form method="GET" action="{{ route('order.index') }}">
+        <div class="card mb-4">
+            <div class="row">
+                <!-- Search -->
+                <div class="col-md-4 mb-3 mb-md-0">
+                    <label for="searchInput" class="form-label">Cari Order</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="search" id="searchInput"
+                            placeholder="Cari berdasarkan no. order/nama..."
+                            value="{{ request('search') }}">
+                        <button class="btn btn-outline-primary" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-4 mb-3 mb-md-0">
-                <label class="form-label">Filter Status</label>
-                <div class="btn-group w-100">
-                    <button type="button" class="btn btn-sm btn-outline-secondary filter-status active" data-status="all">Semua</button>
-                    <button type="button" class="btn btn-sm btn-outline-secondary filter-status" data-status="Menunggu">Menunggu</button>
-                    <button type="button" class="btn btn-sm btn-outline-secondary filter-status" data-status="Dikerjakan">Proses</button>
-                    <button type="button" class="btn btn-sm btn-outline-secondary filter-status" data-status="Selesai">Selesai</button>
+
+                <!-- Filter Status -->
+                <div class="col-md-4 mb-3 mb-md-0">
+                    <label class="form-label">Filter Status</label>
+                    <input type="hidden" name="status" id="statusInput" value="{{ request('status', 'all') }}">
+                    <div class="btn-group w-100">
+                        @foreach(['all' => 'Semua', 'Menunggu' => 'Menunggu', 'Dikerjakan' => 'Proses', 'Selesai' => 'Selesai'] as $key => $label)
+                            <button type="button"
+                                    class="btn btn-sm btn-outline-secondary filter-status {{ request('status', 'all') == $key ? 'active' : '' }}"
+                                    data-status="{{ $key }}">
+                                {{ $label }}
+                            </button>
+                        @endforeach
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <label class="form-label">Filter Layanan</label>
-                <div class="btn-group w-100">
-                    <button type="button" class="btn btn-sm btn-outline-secondary filter-service active" data-service="all">Semua</button>
-                    <button type="button" class="btn btn-sm btn-outline-secondary filter-service" data-service="Ketik">Ketik</button>
-                    <button type="button" class="btn btn-sm btn-outline-secondary filter-service" data-service="Desain">Desain</button>
-                    <button type="button" class="btn btn-sm btn-outline-secondary filter-service" data-service="Cetak">Cetak</button>
+
+                <!-- Filter Layanan -->
+                <div class="col-md-4">
+                    <label class="form-label">Filter Layanan</label>
+                    <input type="hidden" name="service" id="serviceInput" value="{{ request('service', 'all') }}">
+                    <div class="btn-group w-100">
+                        @foreach(['all' => 'Semua', 'Ketik' => 'Ketik', 'Desain' => 'Desain', 'Cetak' => 'Cetak'] as $key => $label)
+                            <button type="button"
+                                    class="btn btn-sm btn-outline-secondary filter-service {{ request('service', 'all') == $key ? 'active' : '' }}"
+                                    data-service="{{ $key }}">
+                                {{ $label }}
+                            </button>
+                        @endforeach
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    </form>
 
     <div class="card">
         <div class="card-header">
@@ -66,18 +83,18 @@
                 </div>
                 <div class="col-md-6 text-end">
                     <div class="dropdown d-inline-block me-2">
-                        <button class="btn btn-sm btn-outline-light dropdown-toggle" type="button" id="sortDropdown" data-bs-toggle="dropdown">
+                        <button class="btn btn-sm btn-outline-dark dropdown-toggle" type="button" id="sortDropdown" data-bs-toggle="dropdown">
                             <i class="fas fa-sort me-1"></i>Urutkan
                         </button>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item sort-option" href="#" data-sort="deadline-asc">Deadline (Terdekat)</a></li>
-                            <li><a class="dropdown-item sort-option" href="#" data-sort="deadline-desc">Deadline (Terjauh)</a></li>
-                            <li><a class="dropdown-item sort-option" href="#" data-sort="date-desc">Terbaru</a></li>
-                            <li><a class="dropdown-item sort-option" href="#" data-sort="date-asc">Terlama</a></li>
+                            <li><a class="dropdown-item sort-option {{ request('sort') == 'deadline-asc' ? 'active' : '' }}" href="{{ route('order.index', ['sort' => 'deadline-asc']) }}" data-sort="deadline-asc">Deadline (Terdekat)</a></li>
+                            <li><a class="dropdown-item sort-option {{ request('sort') == 'deadline-desc' ? 'active' : '' }}" href="{{ route('order.index', ['sort' => 'deadline-desc']) }}" data-sort="deadline-desc">Deadline (Terjauh)</a></li>
+                            <li><a class="dropdown-item sort-option {{ request('sort') == 'date-desc' ? 'active' : '' }}" href="{{ route('order.index', ['sort' => 'date-desc']) }}" data-sort="date-desc">Terbaru</a></li>
+                            <li><a class="dropdown-item sort-option {{ request('sort') == 'date-assc' ? 'active' : '' }}" href="{{ route('order.index', ['sort' => 'date-asc']) }}" data-sort="date-asc">Terlama</a></li>
                         </ul>
                     </div>
                     <span class="badge bg-light text-dark">
-                        Total: 24 order
+                        Order remaining: {{ $progressTotal }}
                     </span>
                 </div>
             </div>
@@ -179,18 +196,43 @@
         <div class="card-footer">
             <nav aria-label="Page navigation">
                 <ul class="pagination justify-content-center mb-0">
-                    <li class="page-item disabled">
-                        <a class="page-link" href="#" tabindex="-1">Previous</a>
+                    {{-- Tombol Previous --}}
+                    <li class="page-item {{ $orders->onFirstPage() ? 'disabled' : '' }}">
+                        <a class="page-link" href="{{ $orders->previousPageUrl() ?? '#' }}" tabindex="-1">Previous</a>
                     </li>
-                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                    <li class="page-item"><a class="page-link" href="#">2</a></li>
-                    <li class="page-item"><a class="page-link" href="#">3</a></li>
-                    <li class="page-item">
-                        <a class="page-link" href="#">Next</a>
+
+                    {{-- Tombol Angka Halaman --}}
+                    @for ($i = 1; $i <= $orders->lastPage(); $i++)
+                        <li class="page-item {{ $orders->currentPage() == $i ? 'active' : '' }}">
+                            <a class="page-link" href="{{ $orders->url($i) }}">{{ $i }}</a>
+                        </li>
+                    @endfor
+
+                    {{-- Tombol Next --}}
+                    <li class="page-item {{ $orders->hasMorePages() ? '' : 'disabled' }}">
+                        <a class="page-link" href="{{ $orders->nextPageUrl() ?? '#' }}">Next</a>
                     </li>
                 </ul>
             </nav>
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+    document.querySelectorAll('.filter-status').forEach(button => {
+        button.addEventListener('click', () => {
+            document.getElementById('statusInput').value = button.dataset.status;
+            button.closest('form').submit();
+        });
+    });
+
+    document.querySelectorAll('.filter-service').forEach(button => {
+        button.addEventListener('click', () => {
+            document.getElementById('serviceInput').value = button.dataset.service;
+            button.closest('form').submit();
+        });
+    });
+</script>
+@endpush
 @endsection

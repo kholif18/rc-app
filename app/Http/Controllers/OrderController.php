@@ -6,8 +6,10 @@ use id;
 use App\Models\Debt;
 use App\Models\Order;
 use App\Models\Customer;
+use App\Models\OrderFile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 
 class OrderController extends Controller
@@ -62,14 +64,15 @@ class OrderController extends Controller
                 break;
         }
 
-        // Pagination 10 per halaman
-        $orders = $query->paginate(10)->withQueryString();
+        // Pagination
+        $orders = $query->paginate(10)->appends($request->query());
 
         // Untuk menampilkan total order (bisa dari paginated result)
         $totalOrders = $orders->total();
 
+        $progressTotal = Order::whereIn('status', ['Menunggu', 'Dikerjakan'])->count();
         // Kirim data ke view
-        return view('order.index', compact('orders', 'totalOrders'));
+        return view('order.index', compact('orders', 'sort', 'totalOrders', 'progressTotal'));
     }
 
     /**
@@ -168,8 +171,30 @@ class OrderController extends Controller
      */
     public function edit(Order $order)
     {
-        $customers = Customer::all();
-        return view('order.edit', compact('order', 'customers'));
+        // Pastikan services berupa array
+        $services = is_array($order->services) ? $order->services : json_decode($order->services, true) ?? [];
+
+        $order->load('files');
+        // Tambahkan semua field yang diperlukan
+        $orderData = [
+            'services' => $services,
+            'docType' => $order->doc_type ?? null, // Pastikan nama kolom sesuai database
+            'pageCount' => $order->page_count ?? null,
+            'designType' => $order->design_type ?? null,
+            'designSize' => $order->design_size ?? null,
+            'printType' => $order->print_type ?? null,
+            'printQuantity' => $order->print_quantity ?? null,
+            'printMaterial' => $order->print_material ?? null,
+            // ... tambahkan field lain yang diperlukan
+        ];
+
+        $order = (object) array_merge((array) $order->toArray(), $orderData, ['services' => $services ?? []]);
+
+        return view('order.edit', [
+        'order' => $order,
+        'customers' => Customer::all(),
+        'files' => $order->files, // <-- penting: ini dari relasi
+    ]);
     }
 
     public function updateStatus(Request $request, Order $order)
@@ -194,9 +219,81 @@ class OrderController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Order $order)
+    public function update(Request $request, $id)
     {
-        //
+        // Validasi input
+        $validated = $request->validate([
+            'customer_id'     => 'required|exists:customers,id',
+            'services'        => 'required|array',
+            'services.*'      => 'in:Ketik,Desain,Cetak',
+            'docType'         => 'nullable|required_if:services,Ketik|string|max:255',
+            'pageCount'       => 'nullable|required_if:services,Ketik|integer|min:1',
+            'designType'      => 'nullable|required_if:services,Desain|string|max:255',
+            'designSize'      => 'nullable|required_if:services,Desain|string|max:255',
+            'printType'       => 'nullable|required_if:services,Cetak|string|max:255',
+            'printQuantity'   => 'nullable|required_if:services,Cetak|integer|min:1',
+            'printMaterial'   => 'nullable|required_if:services,Cetak|string|max:255',
+            'deadline'        => 'required|date',
+            'estimateTime'    => 'required|integer',
+            'status'          => 'required|string',
+            'priority'        => 'required|string',
+            'specialNotes'    => 'nullable|string',
+            'order_files'     => 'nullable|array',
+            'order_files.*'   => 'file|max:10240',
+            'existing_files'  => 'nullable|array',
+            'deleted_files'   => 'nullable|array',
+        ]);
+
+        // Ambil data order
+        $order = Order::findOrFail($id);
+
+        // Update data utama
+        $order->customer_id    = $validated['customer_id'];
+        $order->services       = $validated['services'];
+        $order->deadline       = $validated['deadline'];
+        $order->estimate_time   = $validated['estimateTime'];
+        $order->status         = $validated['status'];
+        $order->priority       = $validated['priority'];
+        $order->special_notes  = $validated['specialNotes'];
+
+        // Update detail layanan
+        $order->doc_type        = in_array('Ketik', $validated['services']) ? $validated['docType'] : null;
+        $order->page_count      = in_array('Ketik', $validated['services']) ? $validated['pageCount'] : null;
+        $order->design_type     = in_array('Desain', $validated['services']) ? $validated['designType'] : null;
+        $order->design_size     = in_array('Desain', $validated['services']) ? $validated['designSize'] : null;
+        $order->print_type      = in_array('Cetak', $validated['services']) ? $validated['printType'] : null;
+        $order->print_quantity  = in_array('Cetak', $validated['services']) ? $validated['printQuantity'] : null;
+        $order->print_material  = in_array('Cetak', $validated['services']) ? $validated['printMaterial'] : null;
+
+        // Hapus file yang dipilih
+        if (!empty($validated['deleted_files'])) {
+            foreach ($validated['deleted_files'] as $fileId) {
+                $file = OrderFile::find($fileId);
+                if ($file) {
+                    Storage::disk('public')->delete(str_replace('storage/', '', $file->filename));
+                    $file->delete();
+                }
+            }
+        }
+
+        // Simpan order
+        $order->save();
+
+        // Upload file baru
+        if ($request->hasFile('order_files')) {
+            foreach ($request->file('order_files') as $file) {
+                
+                $path = $file->store('order_files', 'public');
+
+                $order->files()->create([
+                    'filename' => 'storage/' . $path,
+                    'name' => $file->getClientOriginalName(),
+                    'size' => $file->getSize(),
+                ]);
+            }
+        }
+
+        return redirect()->route('order.index')->with('success', 'Data pesanan berhasil diperbarui.');
     }
 
     public function cancel(Request $request, Order $order)

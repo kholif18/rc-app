@@ -141,7 +141,7 @@
                             <select class="form-select" id="estimateTime" name="estimateTime">
                                 <option value="1">1 Hari</option>
                                 <option value="2">2 Hari</option>
-                                <option value="3" selected>3 Hari</option>
+                                <option value="3">3 Hari</option>
                                 <option value="5">5 Hari</option>
                                 <option value="7">1 Minggu</option>
                                 <option value="14">2 Minggu</option>
@@ -154,7 +154,7 @@
                         <div class="col-md-6">
                             <label for="status" class="form-label">Status Order</label>
                             <select class="form-select" id="status" name="status">
-                                <option value="Menunggu" selected>Menunggu</option>
+                                <option value="Menunggu">Menunggu</option>
                                 <option value="Dikerjakan">Dikerjakan</option>
                                 <option value="Selesai">Selesai</option>
                                 <option value="Diambil">Diambil</option>

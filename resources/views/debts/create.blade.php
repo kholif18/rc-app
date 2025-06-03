@@ -31,19 +31,6 @@
         </div>
     @endif
 
-    @if (session('warning'))
-        <div class="alert alert-warning alert-dismissible" role="alert">
-            {{ session('warning') }} 
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
-
-    @if (session('info'))
-        <div class="alert alert-info alert-dismissible" role="alert">
-            {{ session('info') }} 
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
     {{-- Menampilkan error validasi --}}
     @if ($errors->any())
     <div class="alert alert-danger" role="alert">
@@ -62,40 +49,22 @@
                 @csrf
                 <div class="mb-3">
                     <label for="customer_id" class="form-label">Pelanggan</label>
-                    <select name="customer_id" id="customer_id" class="form-select" required>
+                    <select name="customer_id" id="customer_id" class="form-select select2" required>
                         @foreach ($customers as $customer)
                             <option value="{{ $customer->id }}" {{ old('customer_id') == $customer->id ? 'selected' : '' }}>{{ $customer->name }}</option>
                         @endforeach
                     </select>
-                    {{-- <div class="input-group">
-                        <!-- Input tampilkan nama customer yang dipilih -->
-                        <input
-                            type="text"
-                            class="form-control"
-                            id="customer_name"
-                            placeholder="Pilih pelanggan..."
-                            aria-label="Customer name"
-                            aria-describedby="button-addon-customer"
-                        >
-                        <!-- Tombol untuk membuka modal -->
-                        <button class="btn btn-outline-primary" type="button" id="button-addon-customer" data-bs-toggle="modal" data-bs-target="#customerModal">
-                            Cari
-                        </button>
-                    </div> --}}
-
-                    <!-- input hidden untuk mengirim customer_id -->
-                    {{-- <input type="hidden" name="customer_id" id="customer_id"> --}}
                     @error('customer_id')
                         <span class="text-danger">{{ $message }}</span>
                     @enderror
                 </div>
                 <div class="mb-3">
                     <label for="amount" class="form-label">Jumlah Hutang</label>
-                    <input type="number" name="amount" class="form-control" required step="0.01">
+                    <input type="number" id="amount" name="amount" class="form-control" required step="0.01">
                 </div>
                 <div class="mb-3">
                     <label for="note" class="form-label">Catatan (opsional)</label>
-                    <textarea name="note" class="form-control"></textarea>
+                    <textarea name="note" id="note" class="form-control"></textarea>
                 </div>
                 <button type="submit" class="btn btn-primary">Simpan Hutang</button>
             </form>   
@@ -133,22 +102,4 @@
             });
         });
     </script>
-    {{-- <script>
-        $(document).ready(function () {
-            $('#select_customer').select2({
-                theme: 'bootstrap4',
-                dropdownParent: $('#customerModal')
-            });
-
-            $('#select_customer').on('change', function () {
-                const id = $(this).val();
-                const name = $('#select_customer option:selected').text();
-
-                $('#customer_id').val(id);
-                $('#customer_name').val(name);
-
-                $('#customerModal').modal('hide');
-            });
-        });
-    </script> --}}
 @endpush

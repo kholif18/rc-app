@@ -17,6 +17,46 @@
 @endsection
 
 @section('content')
+<div class="bs-toast toast position-fixed m-2 toast-container top-0 end-0">
+    @if(session('success'))
+        <div
+            class="bs-toast toast fade show bg-success"
+            role="alert"
+            aria-live="assertive"
+            aria-atomic="true"
+        >
+            <div class="toast-header">
+                <i class="bx bx-bell me-2"></i>
+                <div class="me-auto fw-semibold">Sukses</div>
+                <small>Baru saja</small>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                {{ session('success') }}
+            </div>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div
+            class="bs-toast toast fade show bg-danger"
+            role="alert"
+            aria-live="assertive"
+            aria-atomic="true"
+        >
+            <div class="toast-header">
+                <i class="bx bx-bell me-2"></i>
+                <div class="me-auto fw-semibold">Gagal</div>
+                <small>Baru saja</small>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                {{ session('error') }}
+            </div>
+        </div>
+    @endif
+</div>
+
     <div class="card">
         <h4 class="card-header">Pengaturan Layanan</h4>
 
@@ -63,18 +103,6 @@
                         </select>
                     </div>
                 </div>
-
-                @if(session('success'))
-                    <div class="alert alert-success">
-                        {{ session('success') }}
-                    </div>
-                @endif
-
-                @if(session('error'))
-                    <div class="alert alert-danger">
-                        {{ session('error') }}
-                    </div>
-                @endif
 
                 <div class="table-responsive">
                     <table class="table table-striped table-hover">
@@ -157,5 +185,14 @@
             url.searchParams.set('jenis', jenis);
             window.location.href = url.toString();
         }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const toastElements = document.querySelectorAll('.toast');
+            toastElements.forEach(function (toastEl) {
+                const toast = new bootstrap.Toast(toastEl, { delay: 4000 }); // 4 detik
+                toast.show();
+            });
+        });
+
     </script>
 @endsection

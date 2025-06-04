@@ -18,14 +18,9 @@
 
 @section('content')
 <div class="card">
-    <div class="row mb-4">
-        <div class="col-md-6">
+        <div class="mb-2">
             <h2>Tambah Order Baru</h2>
         </div>
-        <div class="col-md-6 text-end">
-            <a class="btn btn-secondary" href="{{ route('order.index') }}"><i class="bx bx-arrow-to-left me-2"></i>Kembali</a>
-        </div>
-    </div>
 
     <form id="orderForm" action="{{ route('order.store') }}" method="POST" enctype="multipart/form-data">
     @csrf
@@ -156,9 +151,6 @@
                             <select class="form-select" id="status" name="status">
                                 <option value="Menunggu">Menunggu</option>
                                 <option value="Dikerjakan">Dikerjakan</option>
-                                <option value="Selesai">Selesai</option>
-                                <option value="Diambil">Diambil</option>
-                                <option value="Batal">Batal</option>
                             </select>
                         </div>
                         <div class="col-md-6">
@@ -182,9 +174,7 @@
 
         <div class="row mt-3">
             <div class="col-md-12 text-end">
-                <button type="button" class="btn btn-secondary me-2">
-                    Batal
-                </button>
+                <a class="btn btn-secondary text-white me-2" id="btn-batal" href="#">Batal</a>
                 <button type="submit" class="btn btn-primary"><i class="bx bx-save"></i> Simpan Order</button>
             </div>
         </div>
@@ -296,6 +286,24 @@
                 placeholder: 'Pilih pelanggan',
                 allowClear: true
             });
+        });
+
+        document.getElementById('btn-batal').addEventListener('click', function (e) {
+            e.preventDefault();
+            Swal.fire({
+                title: 'Yakin batal?',
+                text: "Data belum disimpan akan hilang.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#aaa',
+                confirmButtonText: 'Ya, batalkan',
+                cancelButtonText: 'Kembali'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = "{{ route('order.index') }}";
+                }
+            })
         });
     </script>
 @endpush

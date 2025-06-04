@@ -311,9 +311,9 @@
                             @if ($order->status == 'Batal') <i class="fas fa-close me-1"></i> @endif{{ $order->status }}</span></label>
                             <select name="status" class="form-select" id="statusSelect" required>
                                 <option value="Menunggu" {{ $order->status == 'Menunggu' ? 'selected' : '' }}>Menunggu</option>
-                                <option value="Dikerjakan" {{ $order->status == 'Dikerjakan' ? 'selected' : '' }}>Dalam Pengerjaan</option>
+                                <option value="Dikerjakan" {{ $order->status == 'Dikerjakan' ? 'selected' : '' }}>Dikerjakan</option>
                                 <option value="Selesai" {{ $order->status == 'Selesai' ? 'selected' : '' }}>Selesai</option>
-                                <option value="Diambil" {{ $order->status == 'Diambil' ? 'selected' : '' }}>Sudah Diambil</option>
+                                <option value="Diambil" {{ $order->status == 'Diambil' ? 'selected' : '' }}>Diambil</option>
                                 <option value="Batal" {{ $order->status == 'Batal' ? 'selected' : '' }}>Batal</option>
                             </select>
                         </div>

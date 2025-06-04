@@ -18,15 +18,8 @@
 
 @section('content')
 <div class="card">
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <h2>Tambah Order Baru</h2>
-        </div>
-        <div class="col-md-6 text-end">
-            <button class="btn btn-outline-secondary" onclick="history.back()">
-                <i class="bx bx-arrow-to-left me-2"></i>Kembali
-            </button>
-        </div>
+    <div class="mb-2">
+        <h2>Tambah Order Baru</h2>
     </div>
 
     <form id="orderForm" action="{{ route('order.update', $order->id) }}" method="POST" enctype="multipart/form-data">
@@ -186,13 +179,14 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label for="status" class="form-label">Status Order</label>
-                            <select class="form-select" id="status" name="status">
+                            <select class="form-select" id="status" name="status" disabled>
                                 <option value="Menunggu" {{ $order->status == 'Menunggu' ? 'selected' : '' }}>Menunggu</option>
                                 <option value="Dikerjakan" {{ $order->status == 'Dikerjakan' ? 'selected' : '' }}>Dikerjakan</option>
                                 <option value="Selesai" {{ $order->status == 'Selesai' ? 'selected' : '' }}>Selesai</option>
                                 <option value="Diambil" {{ $order->status == 'Diambil' ? 'selected' : '' }}>Diambil</option>
                                 <option value="Batal" {{ $order->status == 'Batal' ? 'selected' : '' }}>Batal</option>
                             </select>
+                            <input type="hidden" name="status" value="{{ $order->status }}">
                         </div>
                         <div class="col-md-6">
                             <label for="priority" class="form-label">Prioritas</label>
@@ -215,9 +209,7 @@
 
         <div class="row mt-3">
             <div class="col-md-12 text-end">
-                <button type="button" class="btn btn-secondary me-2">
-                    Batal
-                </button>
+                <a class="btn btn-secondary text-white me-2" id="btn-batal">Batal</a>
                 <button type="submit" class="btn btn-primary"><i class="bx bx-save"></i> Simpan Order</button>
             </div>
         </div>
@@ -308,107 +300,125 @@
         });
 
         // Elemen-elemen penting
-    const fileUploadArea = document.getElementById('fileUploadArea');
-    const fileInput = document.getElementById('fileInput');
-    const filePreview = document.getElementById('filePreview');
+        const fileUploadArea = document.getElementById('fileUploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const filePreview = document.getElementById('filePreview');
 
-    // Array untuk menyimpan file yang dipilih user
-    let selectedFiles = [];
+        // Array untuk menyimpan file yang dipilih user
+        let selectedFiles = [];
 
-    // Ketika area diklik, buka file picker
-    fileUploadArea.addEventListener('click', () => fileInput.click());
+        // Ketika area diklik, buka file picker
+        fileUploadArea.addEventListener('click', () => fileInput.click());
 
-    // Ketika file dipilih
-    fileInput.addEventListener('change', function() {
-        if (this.files.length > 0) {
-            // Tambahkan file baru ke array
-            Array.from(this.files).forEach(file => {
-                selectedFiles.push(file);
-            });
+        // Ketika file dipilih
+        fileInput.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                // Tambahkan file baru ke array
+                Array.from(this.files).forEach(file => {
+                    selectedFiles.push(file);
+                });
 
-            // Update preview dan input
-            updateFilePreview();
-        }
-
-        // Reset input agar bisa memilih file yang sama lagi kalau dibutuhkan
-        this.value = '';
-    });
-
-    // Tampilkan preview file
-    function updateFilePreview() {
-        filePreview.innerHTML = '';
-
-        selectedFiles.forEach((file, index) => {
-            const fileItem = document.createElement('div');
-            fileItem.className = 'file-item d-flex align-items-center mb-2';
-
-            // Icon file
-            const fileIcon = document.createElement('i');
-            if (file.type.includes('image')) {
-                fileIcon.className = 'bx bx-image me-2';
-            } else if (file.type.includes('pdf')) {
-                fileIcon.className = 'bx bxs-file-pdf me-2 text-danger';
-            } else if (
-                file.type.includes('word') ||
-                file.name.match(/\.(doc|docx)$/i)
-            ) {
-                fileIcon.className = 'bx bxs-file-word me-2 text-primary';
-            } else {
-                fileIcon.className = 'bx bx-file me-2';
+                // Update preview dan input
+                updateFilePreview();
             }
 
-            // Nama file
-            const fileName = document.createElement('span');
-            fileName.textContent = file.name;
-
-            // Ukuran file
-            const fileSize = document.createElement('small');
-            fileSize.className = 'text-muted ms-2';
-            fileSize.textContent = formatFileSize(file.size);
-
-            // Tombol hapus file
-            const closeBtn = document.createElement('button');
-            closeBtn.type = 'button';
-            closeBtn.className = 'btn btn-sm btn-link text-danger ms-2';
-            closeBtn.innerHTML = '<i class="bx bx-x"></i>';
-            closeBtn.title = 'Hapus file';
-            closeBtn.onclick = () => removeFile(index);
-
-            // Susun item
-            fileItem.appendChild(fileIcon);
-            fileItem.appendChild(fileName);
-            fileItem.appendChild(fileSize);
-            fileItem.appendChild(closeBtn);
-
-            filePreview.appendChild(fileItem);
+            // Reset input agar bisa memilih file yang sama lagi kalau dibutuhkan
+            this.value = '';
         });
 
-        // Update input file
-        updateFileInput();
-    }
+        // Tampilkan preview file
+        function updateFilePreview() {
+            filePreview.innerHTML = '';
 
-    // Update input file agar hanya file di selectedFiles yang dikirim
-    function updateFileInput() {
-        const dataTransfer = new DataTransfer();
-        selectedFiles.forEach(file => {
-            dataTransfer.items.add(file);
+            selectedFiles.forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item d-flex align-items-center mb-2';
+
+                // Icon file
+                const fileIcon = document.createElement('i');
+                if (file.type.includes('image')) {
+                    fileIcon.className = 'bx bx-image me-2';
+                } else if (file.type.includes('pdf')) {
+                    fileIcon.className = 'bx bxs-file-pdf me-2 text-danger';
+                } else if (
+                    file.type.includes('word') ||
+                    file.name.match(/\.(doc|docx)$/i)
+                ) {
+                    fileIcon.className = 'bx bxs-file-word me-2 text-primary';
+                } else {
+                    fileIcon.className = 'bx bx-file me-2';
+                }
+
+                // Nama file
+                const fileName = document.createElement('span');
+                fileName.textContent = file.name;
+
+                // Ukuran file
+                const fileSize = document.createElement('small');
+                fileSize.className = 'text-muted ms-2';
+                fileSize.textContent = formatFileSize(file.size);
+
+                // Tombol hapus file
+                const closeBtn = document.createElement('button');
+                closeBtn.type = 'button';
+                closeBtn.className = 'btn btn-sm btn-link text-danger ms-2';
+                closeBtn.innerHTML = '<i class="bx bx-x"></i>';
+                closeBtn.title = 'Hapus file';
+                closeBtn.onclick = () => removeFile(index);
+
+                // Susun item
+                fileItem.appendChild(fileIcon);
+                fileItem.appendChild(fileName);
+                fileItem.appendChild(fileSize);
+                fileItem.appendChild(closeBtn);
+
+                filePreview.appendChild(fileItem);
+            });
+
+            // Update input file
+            updateFileInput();
+        }
+
+        // Update input file agar hanya file di selectedFiles yang dikirim
+        function updateFileInput() {
+            const dataTransfer = new DataTransfer();
+            selectedFiles.forEach(file => {
+                dataTransfer.items.add(file);
+            });
+            fileInput.files = dataTransfer.files;
+        }
+
+        // Hapus file dari list
+        function removeFile(index) {
+            selectedFiles.splice(index, 1);
+            updateFilePreview(); // otomatis update input juga
+        }
+
+        // Format ukuran file
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        }
+
+            document.getElementById('btn-batal').addEventListener('click', function (e) {
+            e.preventDefault();
+            Swal.fire({
+                title: 'Yakin batal?',
+                text: "Data belum disimpan akan hilang.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#aaa',
+                confirmButtonText: 'Ya, batalkan',
+                cancelButtonText: 'Kembali'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = "{{ route('order.index') }}";
+                }
+            })
         });
-        fileInput.files = dataTransfer.files;
-    }
-
-    // Hapus file dari list
-    function removeFile(index) {
-        selectedFiles.splice(index, 1);
-        updateFilePreview(); // otomatis update input juga
-    }
-
-    // Format ukuran file
-    function formatFileSize(bytes) {
-        if (bytes === 0) return '0 Bytes';
-        const k = 1024;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
-    }
     </script>
 @endpush

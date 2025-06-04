@@ -82,8 +82,8 @@
                             <div data-i18n="Harga & Paket">Harga & Paket</div>
                         </a>
                     </li>
-                    <li class="menu-item {{ Request::is('#*') ? 'active' : '' }}">
-                        <a href="#" class="menu-link">
+                    <li class="menu-item {{ Request::is('bahan-cetak.index*') ? 'active' : '' }}">
+                        <a href="{{ route('bahan-cetak.index') }}" class="menu-link">
                             <div data-i18n="Bahan Cetak">Bahan Cetak</div>
                         </a>
                     </li>

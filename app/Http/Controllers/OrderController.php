@@ -161,10 +161,6 @@ class OrderController extends Controller
     /**
      * Display the specified resource.
      */
-    // public function show(Order $order)
-    // {
-    //     return view('order.show', compact('order'));
-    // }
 
     public function show($orderId)
     {

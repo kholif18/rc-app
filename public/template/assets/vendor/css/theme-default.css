@@ -1076,9 +1076,10 @@ body {
 
 .summary-icon i {
   float: right;
+  margin-top: 16px;
   font-size: 3.5rem;
   display: inline-block;
-  margin-bottom: 0.5rem;
+  margin-bottom: -72px;
 }
 
 .urgent {

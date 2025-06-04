@@ -11,6 +11,7 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\OrderNoteController;
+use App\Http\Controllers\BahanCetakController;
 
 Route::middleware('auth')->group(function () {
     // Route untuk semua user yang terautentikasi
@@ -30,6 +31,16 @@ Route::middleware('auth')->group(function () {
     Route::resource('payments', PaymentController::class)->only(['create', 'store']);
     Route::get('/payments/detail', [PaymentController::class, 'detail'])->name('payments.detail');
     Route::get('/payments/paid', [PaymentController::class, 'index'])->name('payments.index');
+
+    Route::prefix('pengaturan')->group(function () {
+    Route::resource('bahan-cetak', BahanCetakController::class)
+        ->names([
+            'index' => 'bahan-cetak.index',
+            'store' => 'bahan-cetak.store',
+            'update' => 'bahan-cetak.update',
+            'destroy' => 'bahan-cetak.destroy'
+        ]);
+    });
 
     // Hanya untuk admin/superadmin
     Route::middleware('role:superadmin,admin')->group(function () {

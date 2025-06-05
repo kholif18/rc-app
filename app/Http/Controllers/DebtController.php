@@ -6,6 +6,7 @@ use App\Models\Debt;
 use App\Models\Customer;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Auth;
 
 
 class DebtController extends Controller
@@ -75,18 +76,33 @@ class DebtController extends Controller
     {
         $validated = $request->validate([
             'customer_id' => 'required|exists:customers,id',
-            'amount' => 'required|numeric|min:0.01',
-            'note' => 'nullable|string',
+            'amount' => 'required|numeric|min:0',
+            'note' => 'nullable|string'
         ]);
-
-        // BUAT entri hutang baru, bukan update yang lama
+        
+        // Simpan data hutang
         Debt::create([
             'customer_id' => $validated['customer_id'],
             'amount' => $validated['amount'],
             'note' => $validated['note'],
+            'user_id' => Auth::id()
         ]);
-
+        
         return redirect()->route('debts.index')->with('success', 'Hutang berhasil dicatat.');
+        // $validated = $request->validate([
+        //     'customer_id' => 'required|exists:customers,id',
+        //     'amount' => 'required|numeric|min:0.01',
+        //     'note' => 'nullable|string',
+        // ]);
+
+        // // BUAT entri hutang baru, bukan update yang lama
+        // Debt::create([
+        //     'customer_id' => $validated['customer_id'],
+        //     'amount' => $validated['amount'],
+        //     'note' => $validated['note'],
+        // ]);
+
+        // return redirect()->route('debts.index')->with('success', 'Hutang berhasil dicatat.');
     }
 
     /**

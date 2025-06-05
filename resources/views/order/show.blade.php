@@ -17,6 +17,45 @@
 @endsection
 
 @section('content')
+    <div class="bs-toast toast toast-placement-ex top-0 end-0 m-2">
+        @if(session('success'))
+            <div
+                class="bs-toast toast fade show bg-success"
+                role="alert"
+                aria-live="assertive"
+                aria-atomic="true"
+            >
+                <div class="toast-header">
+                    <i class="bx bx-bell me-2"></i>
+                    <div class="me-auto fw-semibold">Sukses</div>
+                    <small>Baru saja</small>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    {{ session('success') }}
+                </div>
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div
+                class="bs-toast toast fade show bg-danger"
+                role="alert"
+                aria-live="assertive"
+                aria-atomic="true"
+            >
+                <div class="toast-header">
+                    <i class="bx bx-bell me-2"></i>
+                    <div class="me-auto fw-semibold">Gagal</div>
+                    <small>Baru saja</small>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    {{ session('error') }}
+                </div>
+            </div>
+        @endif
+    </div>
     <div class="row">
         <!-- Informasi Utama -->
         <div class="col-md-8">
@@ -52,9 +91,6 @@
                             {{ $order->status }}
                         </span>
                     </div>
-                    @if(session('success'))
-                        <div class="alert alert-success">{{ session('success') }}</div>
-                    @endif
                     @if($order->status === 'Batal')
                         <div class="alert alert-danger mt-3">
                             <i class="fas fa-ban me-1"></i> Order ini telah dibatalkan dan tidak bisa diubah.
@@ -146,7 +182,7 @@
                     @if (in_array('Cetak', $order->services))
                         <p class="mb-2"><strong>Jenis Cetak:</strong> {{ $order->print_type }}</p>
                         <p class="mb-2"><strong>Jumlah Cetak:</strong> {{ $order->print_quantity }} lembar</p>
-                        <p class="mb-2"><strong>Bahan Cetak:</strong> {{ $order->print_material }}</p>
+                        <p class="mb-2"><strong>Bahan Cetak:</strong> {{ $order->bahanCetak->nama_bahan }}</p>
                     @endif
 
                     <p class="mb-0"><strong>Catatan Khusus:</strong> {{ $order->special_notes }}</p>
@@ -217,8 +253,6 @@
                         </p>
                     </div>
 
-                    {{-- Timeline progres dari paling lama ke paling baru --}}
-                    {{-- @foreach($order->progress()->oldest()->get() as $progress) --}}
                     @foreach($order->progress->sortBy('created_at') as $progress)
                         <div class="timeline-item">
                             <h6>
@@ -237,12 +271,6 @@
                                 @endif
                             </h6>
                             <p class="text-muted small mb-1">{{ \Carbon\Carbon::parse($progress->created_at)->format('d M Y, H:i') }}</p>
-                            {{-- <p class="small">{{ $progress->note }}
-                                {{ $progress->user->name ?? 'Admin' }}
-                                @if($progress->user)
-                                    ({{ $progress->user->role }})
-                                @endif
-                            </p> --}}
                                 <p class="small">
                                     {{ $progress->note }}
                                     {{ $progress->user->name ?? 'Admin' }}
@@ -374,6 +402,14 @@
 
 @push('scripts')
 <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const toastElements = document.querySelectorAll('.toast');
+        toastElements.forEach(function (toastEl) {
+            const toast = new bootstrap.Toast(toastEl, { delay: 4000 }); // 4 detik
+            toast.show();
+        });
+    });
+    
     document.addEventListener('DOMContentLoaded', function() {
     const timelines = document.querySelectorAll('.timeline');
     

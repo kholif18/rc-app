@@ -48,7 +48,27 @@
             <form action="{{ route('debts.store') }}" method="POST">
                 @csrf
                 <div class="mb-3">
-                    <label for="customer_id" class="form-label">Pelanggan</label>
+                    <div class="form-group">
+                        <label class="form-label" for="customer_search">Cari Pelanggan</label>
+                        <input type="text" 
+                            id="customer_search" 
+                            list="customers_data" 
+                            class="form-control" autofocus
+                            placeholder="Ketik nama pelanggan..."
+                            value="{{ old('customer_name') }}"
+                            autocomplete="off"
+                            required>
+                        <datalist id="customers_data">
+                            @foreach ($customers as $customer)
+                                <option value="{{ $customer->name }}" data-id="{{ $customer->id }}">
+                            @endforeach
+                        </datalist>
+                        <input type="hidden" 
+                            name="customer_id" 
+                            id="customer_id" 
+                            value="{{ old('customer_id') }}">
+                    </div>
+                    {{-- <label for="customer_id" class="form-label">Pelanggan</label>
                     <select name="customer_id" id="customer_id" class="form-select select2" required>
                         @foreach ($customers as $customer)
                             <option value="{{ $customer->id }}" {{ old('customer_id') == $customer->id ? 'selected' : '' }}>{{ $customer->name }}</option>
@@ -56,7 +76,7 @@
                     </select>
                     @error('customer_id')
                         <span class="text-danger">{{ $message }}</span>
-                    @enderror
+                    @enderror --}}
                 </div>
                 <div class="mb-3">
                     <label for="amount" class="form-label">Jumlah Hutang</label>
@@ -74,11 +94,47 @@
 
 @push('scripts')
     <script>
-        $(document).ready(function() {
-            $('#customer_id').select2({
-                placeholder: 'Pilih pelanggan',
-                allowClear: true
+        // input datalist
+        document.addEventListener('DOMContentLoaded', function() {
+            const customerSearch = document.getElementById('customer_search');
+            const customerIdInput = document.getElementById('customer_id');
+            const datalist = document.getElementById('customers_data');
+            
+            // Handle ketika user memilih/menginput
+            customerSearch.addEventListener('change', function() {
+                const selectedName = this.value;
+                const options = datalist.querySelectorAll('option');
+                
+                // Cari customer yang sesuai
+                let found = false;
+                for (let option of options) {
+                    if (option.value === selectedName) {
+                        customerIdInput.value = option.getAttribute('data-id');
+                        found = true;
+                        break;
+                    }
+                }
+                
+                // Jika tidak ditemukan, reset nilai
+                if (!found) {
+                    customerIdInput.value = '';
+                }
+            });
+            
+            // Validasi sebelum form submit
+            document.querySelector('form').addEventListener('submit', function(e) {
+                if (!customerIdInput.value) {
+                    e.preventDefault();
+                    alert('Silakan pilih pelanggan dari daftar yang tersedia');
+                    customerSearch.focus();
+                }
             });
         });
+        // $(document).ready(function() {
+        //     $('#customer_id').select2({
+        //         placeholder: 'Pilih pelanggan',
+        //         allowClear: true
+        //     });
+        // });
     </script>
 @endpush

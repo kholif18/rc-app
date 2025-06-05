@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\Debt;
+use App\Models\Order;
 use App\Models\Report;
 use App\Models\Payment;
 use Illuminate\Http\Request;
@@ -65,5 +67,38 @@ class ReportController extends Controller
     }
 
     return redirect()->back()->with('error', 'Format tidak dikenali.');
+    }
+
+    public function incomeReport(Request $request)
+    {
+        $startDate = $request->input('start_date', Carbon::now()->startOfMonth());
+        $endDate = $request->input('end_date', Carbon::now()->endOfMonth());
+        
+        // Data pendapatan per layanan
+        $servicesIncome = Order::whereBetween('created_at', [$startDate, $endDate])
+            ->selectRaw('
+                SUM(CASE WHEN services LIKE "%Ketik%" THEN 
+                    (page_count * harga_per_halaman) + additional_fee 
+                ELSE 0 END) as ketik_income,
+                
+                SUM(CASE WHEN services LIKE "%Desain%" THEN 
+                    (design_fee) + additional_fee 
+                ELSE 0 END) as desain_income,
+                
+                SUM(CASE WHEN services LIKE "%Cetak%" THEN 
+                    (print_quantity * harga_cetak) + additional_fee 
+                ELSE 0 END) as cetak_income,
+                
+                SUM(total_amount) as total_income
+            ')
+            ->first();
+            
+        // Data pembayaran
+        $payments = Payment::whereBetween('payment_date', [$startDate, $endDate])
+            ->with('order')
+            ->orderBy('payment_date', 'desc')
+            ->get();
+            
+        return view('reports.income', compact('servicesIncome', 'payments', 'startDate', 'endDate'));
     }
 }

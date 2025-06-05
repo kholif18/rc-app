@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Debt extends Model
 {
-    protected $fillable = ['customer_id', 'amount', 'note', 'debt_date'];
+    protected $fillable = ['customer_id', 'amount', 'note', 'debt_date', 'user_id'];
 
     public function customer()
     {

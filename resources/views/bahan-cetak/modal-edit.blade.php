@@ -51,7 +51,7 @@
             var modal = this;
             
             // Set form action URL
-            modal.querySelector('#editBahanForm').action = '/pengaturan/bahan-cetak/' + id;
+            modal.querySelector('#editBahanForm').action = '/bahan-cetak/' + id;
             
             // Populate form fields
             modal.querySelector('#edit_nama_bahan').value = button.getAttribute('data-nama');

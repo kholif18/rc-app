@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BahanCetak;
 use id;
 use App\Models\Debt;
 use App\Models\Order;
@@ -80,8 +81,9 @@ class OrderController extends Controller
      */
     public function create()
     {
+        $materials = BahanCetak::all();
         $customers = Customer::all();
-        return view('order.create', compact('customers'));
+        return view('order.create', compact('customers', 'materials'));
     }
 
     /**
@@ -93,7 +95,7 @@ class OrderController extends Controller
 
         $request->validate([
             'customer_id' => 'required|exists:customers,id',
-            'order_files.*' => 'nullable|file|max:10240',
+            'order_files.*' => 'nullable|file|max:204840',
             'deadline' => 'required|date',
             'estimateTime' => 'required|integer',
             'status' => 'required|string',
@@ -102,6 +104,14 @@ class OrderController extends Controller
             'services' => 'required|array|min:1',
         ]);
 
+        // Validasi tambahan: pastikan customer_id sesuai dengan customer yang ada
+        $customer = Customer::find($request->customer_id);
+        if (!$customer) {
+            return back()->withInput()->withErrors([
+                'customer_id' => 'Pelanggan yang dipilih tidak valid'
+            ]);
+        }
+        
         // Validasi tambahan tergantung layanan yang dipilih
         $customRules = [];
 
@@ -118,14 +128,13 @@ class OrderController extends Controller
         if (in_array('Cetak', $services)) {
             $customRules['printType'] = 'required|string';
             $customRules['printQuantity'] = 'required|integer|min:1';
-            $customRules['printMaterial'] = 'required|string';
+            $customRules['bahanCetakId'] = 'required|exists:bahan_cetak,id';
         }
 
         $request->validate($customRules);
-
+        
         $order = Order::create([
             'user_id'        => Auth::id(), // Menyimpan user yang login
-            'customer_id'    => $request->customer_id,
             'customer_id'    => $request->customer_id,
             'services'       => $request->services,
             'doc_type'       => $request->docType,
@@ -134,7 +143,7 @@ class OrderController extends Controller
             'design_size'    => $request->designSize,
             'print_type'     => $request->printType,
             'print_quantity' => $request->printQuantity,
-            'print_material' => $request->printMaterial,
+            'bahan_cetak_id' => $request->bahanCetakId,
             'deadline'       => $request->deadline,
             'estimate_time'  => $request->estimateTime,
             'status'   => $request->status,
@@ -194,10 +203,11 @@ class OrderController extends Controller
         $order = (object) array_merge((array) $order->toArray(), $orderData, ['services' => $services ?? []]);
 
         return view('order.edit', [
-        'order' => $order,
-        'customers' => Customer::all(),
-        'files' => $order->files, // <-- penting: ini dari relasi
-    ]);
+            'order' => $order,
+            'customers' => Customer::all(),
+            'materials' => BahanCetak::all(),
+            'files' => $order->files, // <-- penting: ini dari relasi
+        ]);
     }
 
     public function updateStatus(Request $request, Order $order)
@@ -236,14 +246,14 @@ class OrderController extends Controller
             'designSize'      => 'nullable|required_if:services,Desain|string|max:255',
             'printType'       => 'nullable|required_if:services,Cetak|string|max:255',
             'printQuantity'   => 'nullable|required_if:services,Cetak|integer|min:1',
-            'printMaterial'   => 'nullable|required_if:services,Cetak|string|max:255',
+            'bahanCetakId'    => 'nullable|required_if:services,Cetak|exists:bahan_cetak,id',
             'deadline'        => 'required|date',
             'estimateTime'    => 'required|integer',
             'status'          => 'required|string',
             'priority'        => 'required|string',
             'specialNotes'    => 'nullable|string',
             'order_files'     => 'nullable|array',
-            'order_files.*'   => 'file|max:10240',
+            'order_files.*'   => 'file|max:20480',
             'existing_files'  => 'nullable|array',
             'deleted_files'   => 'nullable|array',
         ]);
@@ -267,7 +277,7 @@ class OrderController extends Controller
         $order->design_size     = in_array('Desain', $validated['services']) ? $validated['designSize'] : null;
         $order->print_type      = in_array('Cetak', $validated['services']) ? $validated['printType'] : null;
         $order->print_quantity  = in_array('Cetak', $validated['services']) ? $validated['printQuantity'] : null;
-        $order->print_material  = in_array('Cetak', $validated['services']) ? $validated['printMaterial'] : null;
+        $order->bahan_cetak_id  = in_array('Cetak', $validated['services']) ? $validated['bahanCetakId'] : null;
 
         // Hapus file yang dipilih
         if (!empty($validated['deleted_files'])) {

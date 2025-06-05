@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Customer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class CustomerController extends Controller
@@ -32,7 +33,7 @@ class CustomerController extends Controller
      */
     public function create()
     {
-        return view('customers.create');
+        //
     }
 
     /**
@@ -40,16 +41,36 @@ class CustomerController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
+        // $request->validate([
+        //     'name' => 'required|string|max:255',
+        //     'phone' => 'nullable|string|max:20',
+        //     'email' => 'nullable|email|max:255',
+        //     'address' => 'nullable|string|max:255',
+        // ]);
+
+        // Customer::create($request->all());
+
+        // return redirect()->route('customers.index')->with('success', 'Pelanggan berhasil ditambahkan.');
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:100',
             'phone' => 'nullable|string|max:20',
-            'email' => 'nullable|email|max:255',
-            'address' => 'nullable|string|max:255',
+            'email' => 'nullable|email|max:100',
+            'address' => 'nullable|string|max:255'
         ]);
-
-        Customer::create($request->all());
-
-        return redirect()->route('customers.index')->with('success', 'Pelanggan berhasil ditambahkan.');
+        
+        $customer = Customer::create($validated);
+        
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'customer' => $customer,
+                'message' => 'Pelanggan berhasil ditambahkan'
+            ]);
+        }
+        
+        return redirect()->route('customers.index')
+            ->with('success', 'Pelanggan berhasil ditambahkan');
     }
 
     /**
@@ -65,26 +86,32 @@ class CustomerController extends Controller
      */
     public function edit(Customer $customer)
     {
-        return view('customers.edit', compact('customer'));
+        //
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Customer $customer)
+    public function update(Request $request, $id)
     {
-        $request->validate([
+        $customer = Customer::findOrFail($id);
+
+        $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'phone' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:255',
             'address' => 'nullable|string|max:255',
         ]);
 
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput()
+                ->with('error', 'Terjadi kesalahan validasi');
+        }
+
         $customer->update($request->all());
 
-        return redirect()->route('customers.index')->with('success', 'Data pelanggan diperbarui.');
+        return redirect()->route('customers.index')
+            ->with('success', 'Pelanggan berhasil diperbarui');
     }
-
     /**
      * Remove the specified resource from storage.
      */

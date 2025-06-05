@@ -31,7 +31,10 @@ return new class extends Migration
             // Detail Cetak
             $table->string('print_type')->nullable();
             $table->integer('print_quantity')->nullable();
-            $table->string('print_material')->nullable();
+
+            // Tambahkan kolom foreign key untuk bahan cetak
+            $table->unsignedBigInteger('bahan_cetak_id')->nullable();
+            $table->foreign('bahan_cetak_id')->references('id')->on('bahan_cetak')->onDelete('set null');
 
             // Deadline dan Estimasi
             $table->dateTime('deadline')->nullable();

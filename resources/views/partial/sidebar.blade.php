@@ -64,30 +64,12 @@
                 <div data-i18n="Customers">Customers</div>
                 </a>
             </li>
-            
-            <!-- User interface -->
-            <li class="menu-item {{ Request::is('#*') ? 'active' : '' }}">
-                <a href="#" class="menu-link menu-toggle">
-                    <i class="menu-icon tf-icons bx bx bx-slider-alt"></i>
-                    <div data-i18n="Pengaturan Layanan">Pengaturan Layanan</div>
+
+            <li class="menu-item  {{ Request::is('bahan-cetak.index*') ? 'active' : '' }}">
+                <a href="{{ route('bahan-cetak.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-paper-plane"></i>
+                <div data-i18n="Bahan Cetak">Bahan Cetak</div>
                 </a>
-                <ul class="menu-sub">
-                    <li class="menu-item {{ Request::is('#*') ? 'active' : '' }}">
-                        <a href="#" class="menu-link">
-                            <div data-i18n="Daftar Layanan">Daftar Layanan</div>
-                        </a>
-                    </li>
-                    <li class="menu-item {{ Request::is('#*') ? 'active' : '' }}">
-                        <a href="#" class="menu-link">
-                            <div data-i18n="Harga & Paket">Harga & Paket</div>
-                        </a>
-                    </li>
-                    <li class="menu-item {{ Request::is('bahan-cetak.index*') ? 'active' : '' }}">
-                        <a href="{{ route('bahan-cetak.index') }}" class="menu-link">
-                            <div data-i18n="Bahan Cetak">Bahan Cetak</div>
-                        </a>
-                    </li>
-                </ul>
             </li>
 
             <li class="menu-header small text-uppercase">

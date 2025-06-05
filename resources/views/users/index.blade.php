@@ -53,14 +53,14 @@
                                 <a href="{{ route('users.edit', $user->id) }}" class="btn btn-sm btn-warning">Edit</a>
                                 @can('delete', $user)
                                     @if($user->role !== 'superadmin')
-                                        <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus user ini?');">
+                                        <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="d-inline">
                                             @csrf
                                             @method('DELETE')
-                                            <button class="btn btn-sm btn-danger">Hapus</button>
+                                            <button type="button" class="btn btn-sm btn-danger btn-delete">Hapus</button>
                                         </form>
                                     @endif
                                 @else
-                                    <button class="btn btn-danger btn-sm" disabled title="Anda tidak memiliki izin">
+                                    <button class="btn btn-danger btn-sm btn-delete" disabled title="Anda tidak memiliki izin">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 @endcan
@@ -75,4 +75,31 @@
             </table>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const deleteButtons = document.querySelectorAll('.btn-delete');
+
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    const form = this.closest('form');
+
+                    Swal.fire({
+                        title: 'Yakin ingin menghapus?',
+                        text: "Data yang dihapus tidak bisa dikembalikan!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Ya, hapus!',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                });
+            });
+        });
+    </script>
 @endsection

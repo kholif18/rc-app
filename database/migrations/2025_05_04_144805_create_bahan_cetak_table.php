@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('bahan_cetak', function (Blueprint $table) {
             $table->id();
-            $table->string('nama_bahan');
+            $table->string('nama_bahan')->unique();
             $table->string('jenis_bahan');
             $table->string('gramatur')->nullable();
             $table->string('ukuran');

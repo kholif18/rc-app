@@ -17,7 +17,7 @@ class Order extends Model
         'design_size',
         'print_type',
         'print_quantity',
-        'print_material',
+        'bahan_cetak_id',
         'deadline',
         'estimate_time',
         'status',
@@ -55,4 +55,9 @@ class Order extends Model
     {
         return $this->hasMany(InternalNote::class);
     }
+
+    public function bahanCetak()
+{
+    return $this->belongsTo(BahanCetak::class, 'bahan_cetak_id');
+}
 }

@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Debt;
-use App\Models\Customer;
+use App\Models\Order;
 // use Illuminate\Http\Request;
 use App\Models\Payment;
+use App\Models\Customer;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -14,6 +16,30 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        
+        // Ambil daftar pelanggan yang punya hutang saat ini
+        $currentCustomersWithDebt = Customer::whereHas('debts', function ($query) {
+            $query->selectRaw('customer_id, SUM(amount) as total_debt')
+                ->groupBy('customer_id');
+        })->get()->filter(function ($customer) {
+            $totalDebt = $customer->debts->sum('amount');
+            $totalPaid = $customer->debts->flatMap->payments->sum('amount');
+            return $totalDebt - $totalPaid > 0;
+        });
+
+        // Misal kamu simpan snapshot data pelanggan berhutang kemarin di session/cache/db (contoh ambil dari cache):
+        $previousCustomersWithDebt = cache()->get('previous_customers_with_debt', collect());
+
+        // Hitung jumlah pelanggan berhutang sekarang dan sebelumnya
+        $currentCount = $currentCustomersWithDebt->count();
+        $previousCount = $previousCustomersWithDebt->count();
+
+        // Hitung selisih perubahan pelanggan berhutang
+        $customerDebtDifference = $currentCount - $previousCount;
+
+        // Simpan snapshot untuk perhitungan berikutnya (misal untuk keesokan hari)
+        cache()->put('previous_customers_with_debt', $currentCustomersWithDebt, now()->addDay());
+        
         $customers = Customer::with('debts.payments')->get();
 
         // Filter yang punya sisa hutang > 0
@@ -53,28 +79,66 @@ class DashboardController extends Controller
             ];
         });
 
-        // Ambil 5 pembayaran terbaru
-        $recentPayments = Payment::with('debt.customer')->latest()->take(5)->get()->map(function ($payment) {
-            return (object)[
-                'type' => 'payment',
-                'amount' => $payment->amount,
-                'note' => $payment->note,
-                'date' => $payment->payment_date,
-                'customer_name' => $payment->debt->customer->name,
-            ];
-        });
+        // Ambil 5 order terakhir
+        $latestOrders = Order::with('customer')
+            ->latest()
+            ->take(5)
+            ->get();
+            
+        // Ambil 5 order terlambat (H-1 sampai lewat deadline)
+        $today = Carbon::today();
+        $lateOrders = Order::with('customer')
+            ->whereDate('deadline', '<=', $today->copy()->addDay()) // H-1 atau lebih
+            ->where('status', '!=', 'Selesai') // opsional, hanya tampilkan yang belum selesai
+            ->orderBy('deadline', 'asc')
+            ->take(5)
+            ->get();
+            
+        // Hitung jumlah order hari ini dan kemarin berdasarkan jenis layanan
+        $today = Carbon::today();
+        $yesterday = Carbon::yesterday();
 
-        // Gabungkan dan urutkan aktivitas terbaru
-        $recentActivities = $recentDebts->merge($recentPayments)->sortByDesc('date')->take(10);
+        $typingToday = Order::whereJsonContains('services', 'Ketik')
+            ->whereDate('created_at', $today)
+            ->count();
+
+        $typingYesterday = Order::whereJsonContains('services', 'Ketik')
+            ->whereDate('created_at', $yesterday)
+            ->count();
+
+        $designToday = Order::whereJsonContains('services', 'Desain')
+            ->whereDate('created_at', $today)
+            ->count();
+
+        $designYesterday = Order::whereJsonContains('services', 'Desain')
+            ->whereDate('created_at', $yesterday)
+            ->count();
+
+        $printToday = Order::whereJsonContains('services', 'Cetak')
+            ->whereDate('created_at', $today)
+            ->count();
+
+        $printYesterday = Order::whereJsonContains('services', 'Cetak')
+            ->whereDate('created_at', $yesterday)
+            ->count();
+
+        // Selisih perubahan
+        $typingChange = $typingToday - $typingYesterday;
+        $designChange = $designToday - $designYesterday;
+        $printChange = $printToday - $printYesterday;
 
         return view('dashboard.index', compact(
+            'customerDebtDifference',
             'totalDebt',
             'totalPaid',
             'remainingDebt',
             'customerCount',
-            'recentActivities',
-            'paginatedCustomers'  // ganti dari 'customers' ke 'paginatedCustomers'
-
+            'paginatedCustomers',
+            'latestOrders',
+            'lateOrders',
+            'typingToday', 'typingChange',
+            'designToday', 'designChange',
+            'printToday', 'printChange'
         ));
     }
 }

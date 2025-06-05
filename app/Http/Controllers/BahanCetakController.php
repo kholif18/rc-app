@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\BahanCetak;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class BahanCetakController extends Controller
 {
@@ -24,7 +25,7 @@ class BahanCetakController extends Controller
 
         $jenisBahan = BahanCetak::distinct('jenis_bahan')->pluck('jenis_bahan');
 
-        return view('pengaturan.bahan-cetak.index', compact('bahanCetak', 'jenisBahan'));
+        return view('bahan-cetak.index', compact('bahanCetak', 'jenisBahan'));
     }
 
     /**
@@ -41,17 +42,35 @@ class BahanCetakController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'nama_bahan' => 'required|string|max:100',
+            'nama_bahan' => 'required|string|max:100|unique:bahan_cetak,nama_bahan',
             'jenis_bahan' => 'required|string|max:50',
             'gramatur' => 'nullable|string|max:20',
             'ukuran' => 'required|string|max:50',
+        ], [
+            'nama_bahan.required'  => 'Nama bahan wajib diisi.',
+            'nama_bahan.string'    => 'Nama bahan harus berupa teks.',
+            'nama_bahan.max'       => 'Nama bahan tidak boleh lebih dari 100 karakter.',
+            'nama_bahan.unique'    => 'Nama bahan sudah digunakan, silakan gunakan nama lain.',
+
+            'jenis_bahan.required' => 'Jenis bahan wajib diisi.',
+            'jenis_bahan.string'   => 'Jenis bahan harus berupa teks.',
+            'jenis_bahan.max'      => 'Jenis bahan tidak boleh lebih dari 50 karakter.',
+
+            'gramatur.string'      => 'Gramatur harus berupa teks.',
+            'gramatur.max'         => 'Gramatur tidak boleh lebih dari 20 karakter.',
+
+            'ukuran.required'      => 'Ukuran bahan wajib diisi.',
+            'ukuran.string'        => 'Ukuran harus berupa teks.',
+            'ukuran.max'           => 'Ukuran tidak boleh lebih dari 50 karakter.',
         ]);
 
         if ($validator->fails()) {
+            // Ambil semua pesan validasi dan jadikan string, misal dipisah baris baru
+            $messages = implode('<br>', $validator->errors()->all());
+
             return redirect()->back()
-                ->withErrors($validator)
                 ->withInput()
-                ->with('error', 'Terjadi kesalahan validasi');
+                ->with('error', $messages);
         }
 
         BahanCetak::create($request->all());
@@ -84,17 +103,35 @@ class BahanCetakController extends Controller
         $bahanCetak = BahanCetak::findOrFail($id);
 
         $validator = Validator::make($request->all(), [
-            'nama_bahan' => 'required|string|max:100',
+            'nama_bahan' => 'required|string|max:100|unique:bahan_cetak,nama_bahan',
             'jenis_bahan' => 'required|string|max:50',
             'gramatur' => 'nullable|string|max:20',
             'ukuran' => 'required|string|max:50',
+            ], [
+            'nama_bahan.required'  => 'Nama bahan wajib diisi.',
+            'nama_bahan.string'    => 'Nama bahan harus berupa teks.',
+            'nama_bahan.max'       => 'Nama bahan tidak boleh lebih dari 100 karakter.',
+            'nama_bahan.unique'    => 'Nama bahan sudah digunakan, silakan gunakan nama lain.',
+
+            'jenis_bahan.required' => 'Jenis bahan wajib diisi.',
+            'jenis_bahan.string'   => 'Jenis bahan harus berupa teks.',
+            'jenis_bahan.max'      => 'Jenis bahan tidak boleh lebih dari 50 karakter.',
+
+            'gramatur.string'      => 'Gramatur harus berupa teks.',
+            'gramatur.max'         => 'Gramatur tidak boleh lebih dari 20 karakter.',
+
+            'ukuran.required'      => 'Ukuran bahan wajib diisi.',
+            'ukuran.string'        => 'Ukuran harus berupa teks.',
+            'ukuran.max'           => 'Ukuran tidak boleh lebih dari 50 karakter.',
         ]);
 
         if ($validator->fails()) {
+            // Ambil semua pesan validasi dan jadikan string, misal dipisah baris baru
+            $messages = implode('<br>', $validator->errors()->all());
+
             return redirect()->back()
-                ->withErrors($validator)
                 ->withInput()
-                ->with('error', 'Terjadi kesalahan validasi');
+                ->with('error', $messages);
         }
 
         $bahanCetak->update($request->all());

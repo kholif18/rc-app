@@ -148,9 +148,15 @@
                                         value="{{ old('printQuantity', $order->printQuantity) }}">
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label for="printMaterial" class="form-label">Bahan</label>
-                                    <input type="text" class="form-control" name="printMaterial" id="printMaterial" 
-                                        value="{{ old('printMaterial', $order->printMaterial) }}">
+                                    <label for="bahanCetakId" class="form-label">Bahan</label>
+                                    <select class="form-control" name="bahanCetakId" id="bahanCetakId" required>
+                                        <option value="">-- Pilih Bahan --</option>
+                                        @foreach($materials as $material)
+                                            <option value="{{ $material->id }}" {{ old('bahanCetakId', $order->bahan_cetak_id ?? '') == $material->id ? 'selected' : '' }}>
+                                                {{ $material->nama_bahan }}
+                                            </option>
+                                        @endforeach
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -228,197 +234,222 @@
             designSize: @json($order->designSize ?? ''),
             printType: @json($order->printType ?? ''),
             printQuantity: @json($order->printQuantity ?? ''),
-            printMaterial: @json($order->printMaterial ?? '')
+            printMaterial: @json($order->bahan_cetak_id ?? '')
         };
 
-        document.addEventListener('DOMContentLoaded', function() {
-            // Fungsi untuk menampilkan detail layanan
+        // Checkbox & Show/Hide Section
+        function initCheckboxBehavior() {
+            const serviceMap = {
+                ketik: 'ketikDetails',
+                desain: 'desainDetails',
+                cetak: 'cetakDetails'
+            };
+
+            Object.keys(serviceMap).forEach(service => {
+                const cb = document.getElementById('service' + service.charAt(0).toUpperCase() + service.slice(1));
+                if (cb && !cb.checked) {
+                    hideServiceDetail(service); // Sembunyikan dan hilangkan required
+                }
+            });
+
             function showServiceDetail(service) {
-                const detailElement = document.getElementById(`${service}Details`);
+                const detailId = serviceMap[service];
+                const detailElement = document.getElementById(detailId);
                 if (detailElement) {
                     detailElement.style.display = 'block';
-                    
-                    // Set required attribute jika diperlukan
-                    const inputs = detailElement.querySelectorAll('input');
-                    inputs.forEach(input => {
-                        input.setAttribute('required', 'required');
-                    });
+                    detailElement.querySelectorAll('input, select').forEach(el => el.setAttribute('required', 'required'));
                 }
             }
 
-            // Set checkbox dan tampilkan detail berdasarkan data dari database
-            orderData.services.forEach(service => {
-                const serviceId = service.toLowerCase();
-                const checkbox = document.getElementById(`service${service}`);
-                if (checkbox) {
-                    checkbox.checked = true;
-                    showServiceDetail(serviceId);
+            function hideServiceDetail(service) {
+                const detailId = serviceMap[service];
+                const detailElement = document.getElementById(detailId);
+                if (detailElement) {
+                    detailElement.style.display = 'none';
+                    detailElement.querySelectorAll('input, select').forEach(el => el.removeAttribute('required'));
                 }
-            });
+            }
 
-            // Event listener untuk perubahan checkbox
-            document.querySelectorAll('.service-checkbox').forEach(checkbox => {
-                checkbox.addEventListener('change', function() {
-                    const service = this.id.replace('service', '').toLowerCase();
-                    const detailElement = document.getElementById(`${service}Details`);
-                    
-                    if (this.checked) {
-                        detailElement.style.display = 'block';
-                        // Set required attribute
-                        const inputs = detailElement.querySelectorAll('input');
-                        inputs.forEach(input => {
-                            input.setAttribute('required', 'required');
-                        });
+            // Fungsi untuk memeriksa dan mengatur bahan cetak
+            function setInitialBahanCetak() {
+                const bahanSelect = document.getElementById('bahanCetakId');
+                if (bahanSelect && orderData.printMaterial) {
+                    // Tunggu sebentar untuk memastikan options sudah terload
+                    setTimeout(() => {
+                        const optionExists = [...bahanSelect.options].some(opt => opt.value == orderData.printMaterial);
+                        if (optionExists) {
+                            bahanSelect.value = orderData.printMaterial;
+                        }
+                    }, 100);
+                }
+            }
+
+            document.querySelectorAll('.service-checkbox').forEach(cb => {
+                const service = cb.id.replace('service', '').toLowerCase();
+
+                cb.addEventListener('change', () => {
+                    if (cb.checked) {
+                        showServiceDetail(service);
+                        if (service === 'cetak') setInitialBahanCetak();
                     } else {
-                        detailElement.style.display = 'none';
-                        // Hapus required attribute
-                        const inputs = detailElement.querySelectorAll('input');
-                        inputs.forEach(input => {
-                            input.removeAttribute('required');
-                        });
+                        hideServiceDetail(service);
                     }
                 });
-            });
 
-            // Handle file removal
-            document.addEventListener('click', function(e) {
-                if (e.target.classList.contains('remove-file') || e.target.closest('.remove-file')) {
-                    const fileItem = e.target.closest('.file-item');
-                    if (fileItem) {
-                        // Jika ini file yang sudah ada di database
-                        if (fileItem.dataset.fileId) {
-                            const deleteInput = document.createElement('input');
-                            deleteInput.type = 'hidden';
-                            deleteInput.name = 'deleted_files[]';
-                            deleteInput.value = fileItem.dataset.fileId;
-                            document.getElementById('orderForm').appendChild(deleteInput);
-                        }
-                        fileItem.remove();
+                // Inisialisasi jika sudah tercentang (misalnya pada edit)
+                if (cb.checked) {
+                    showServiceDetail(service);
+                    if (service === 'cetak') {
+                        // Panggil setInitialBahanCetak() saat halaman pertama kali dimuat
+                        setInitialBahanCetak();
                     }
                 }
             });
+
+            // Jika halaman edit dan cetak adalah salah satu service yang dipilih
+            if (orderData.services && orderData.services.includes('cetak')) {
+                const cetakCheckbox = document.getElementById('serviceCetak');
+                if (cetakCheckbox) {
+                    cetakCheckbox.checked = true;
+                    showServiceDetail('cetak');
+                    setInitialBahanCetak();
+                }
+            }
+        }
+
+        // Panggil fungsi init saat halaman selesai dimuat
+        document.addEventListener('DOMContentLoaded', function() {
+            initCheckboxBehavior();
         });
 
-        // Elemen-elemen penting
-        const fileUploadArea = document.getElementById('fileUploadArea');
-        const fileInput = document.getElementById('fileInput');
-        const filePreview = document.getElementById('filePreview');
+        // Handle file removal dengan pengecekan null
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('remove-file') || e.target.closest('.remove-file')) {
+                const fileItem = e.target.closest('.file-item');
+                if (!fileItem) return;
+                
+                // Jika ini file yang sudah ada di database
+                if (fileItem.dataset.fileId) {
+                    const deleteInput = document.createElement('input');
+                    deleteInput.type = 'hidden';
+                    deleteInput.name = 'deleted_files[]';
+                    deleteInput.value = fileItem.dataset.fileId;
+                    
+                    const orderForm = document.getElementById('orderForm');
+                    if (orderForm) {
+                        orderForm.appendChild(deleteInput);
+                    }
+                }
+                fileItem.remove();
+            }
+        });
 
-        // Array untuk menyimpan file yang dipilih user
-        let selectedFiles = [];
 
-        // Ketika area diklik, buka file picker
-        fileUploadArea.addEventListener('click', () => fileInput.click());
+        //Upload File
+        function initFileUpload() {
+            const fileUploadArea = document.getElementById('fileUploadArea');
+            const fileInput = document.getElementById('fileInput');
+            const filePreview = document.getElementById('filePreview');
+            const cancelUploadBtn = document.getElementById('cancelUploadBtn');
 
-        // Ketika file dipilih
-        fileInput.addEventListener('change', function() {
-            if (this.files.length > 0) {
-                // Tambahkan file baru ke array
-                Array.from(this.files).forEach(file => {
-                    selectedFiles.push(file);
+            let selectedFiles = [];
+
+            function formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+
+            function updateFilePreview() {
+                filePreview.innerHTML = '';
+                if (selectedFiles.length === 0) {
+                    filePreview.innerHTML = '<div class="text-muted">Belum ada file dipilih</div>';
+                    cancelUploadBtn.style.display = 'none';
+                    return;
+                }
+
+                selectedFiles.forEach((file, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'file-item d-flex align-items-center mb-2';
+
+                    const icon = document.createElement('i');
+                    if (file.type.includes('image')) icon.className = 'bx bx-image me-2';
+                    else if (file.type.includes('pdf')) icon.className = 'bx bxs-file-pdf me-2 text-danger';
+                    else if (file.type.includes('word')) icon.className = 'fas fa-file-word me-2 text-primary';
+                    else icon.className = 'bx bx-file me-2';
+
+                    const name = document.createElement('span');
+                    name.textContent = file.name;
+
+                    const size = document.createElement('small');
+                    size.className = 'text-muted ms-2';
+                    size.textContent = formatFileSize(file.size);
+
+                    const closeBtn = document.createElement('button');
+                    closeBtn.className = 'btn btn-sm btn-link text-danger ms-2 remove-file';
+                    closeBtn.innerHTML = '<i class="bx bx-x"></i>';
+                    closeBtn.addEventListener('click', () => removeFile(index));
+
+                    item.append(icon, name, size, closeBtn);
+                    filePreview.appendChild(item);
                 });
 
-                // Update preview dan input
+                updateFileInput();
+                cancelUploadBtn.style.display = 'inline-block';
+            }
+
+            function updateFileInput() {
+                const dataTransfer = new DataTransfer();
+                selectedFiles.forEach(file => dataTransfer.items.add(file));
+                fileInput.files = dataTransfer.files;
+            }
+
+            function removeFile(index) {
+                selectedFiles.splice(index, 1);
                 updateFilePreview();
             }
 
-            // Reset input agar bisa memilih file yang sama lagi kalau dibutuhkan
-            this.value = '';
+            if (fileUploadArea && fileInput && filePreview) {
+                fileUploadArea.addEventListener('click', () => fileInput.click());
+
+                fileInput.addEventListener('change', () => {
+                    Array.from(fileInput.files).forEach(file => selectedFiles.push(file));
+                    updateFilePreview();
+                });
+            }
+        }
+
+        //Tombol Batal
+        function initCancelButton() {
+            const btnBatal = document.getElementById('btn-batal');
+            if (!btnBatal) return;
+
+            btnBatal.addEventListener('click', function (e) {
+                e.preventDefault();
+                Swal.fire({
+                    title: 'Yakin batal?',
+                    text: "Data belum disimpan akan hilang.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, batalkan',
+                    cancelButtonText: 'Kembali'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = "{{ route('order.index') }}";
+                    }
+                });
+            });
+        }
+
+        //Inisialisasi Semua
+        document.addEventListener('DOMContentLoaded', function () {
+            initCheckboxBehavior();
+            initFileUpload();
+            initCancelButton();
         });
 
-        // Tampilkan preview file
-        function updateFilePreview() {
-            filePreview.innerHTML = '';
 
-            selectedFiles.forEach((file, index) => {
-                const fileItem = document.createElement('div');
-                fileItem.className = 'file-item d-flex align-items-center mb-2';
-
-                // Icon file
-                const fileIcon = document.createElement('i');
-                if (file.type.includes('image')) {
-                    fileIcon.className = 'bx bx-image me-2';
-                } else if (file.type.includes('pdf')) {
-                    fileIcon.className = 'bx bxs-file-pdf me-2 text-danger';
-                } else if (
-                    file.type.includes('word') ||
-                    file.name.match(/\.(doc|docx)$/i)
-                ) {
-                    fileIcon.className = 'bx bxs-file-word me-2 text-primary';
-                } else {
-                    fileIcon.className = 'bx bx-file me-2';
-                }
-
-                // Nama file
-                const fileName = document.createElement('span');
-                fileName.textContent = file.name;
-
-                // Ukuran file
-                const fileSize = document.createElement('small');
-                fileSize.className = 'text-muted ms-2';
-                fileSize.textContent = formatFileSize(file.size);
-
-                // Tombol hapus file
-                const closeBtn = document.createElement('button');
-                closeBtn.type = 'button';
-                closeBtn.className = 'btn btn-sm btn-link text-danger ms-2';
-                closeBtn.innerHTML = '<i class="bx bx-x"></i>';
-                closeBtn.title = 'Hapus file';
-                closeBtn.onclick = () => removeFile(index);
-
-                // Susun item
-                fileItem.appendChild(fileIcon);
-                fileItem.appendChild(fileName);
-                fileItem.appendChild(fileSize);
-                fileItem.appendChild(closeBtn);
-
-                filePreview.appendChild(fileItem);
-            });
-
-            // Update input file
-            updateFileInput();
-        }
-
-        // Update input file agar hanya file di selectedFiles yang dikirim
-        function updateFileInput() {
-            const dataTransfer = new DataTransfer();
-            selectedFiles.forEach(file => {
-                dataTransfer.items.add(file);
-            });
-            fileInput.files = dataTransfer.files;
-        }
-
-        // Hapus file dari list
-        function removeFile(index) {
-            selectedFiles.splice(index, 1);
-            updateFilePreview(); // otomatis update input juga
-        }
-
-        // Format ukuran file
-        function formatFileSize(bytes) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
-        }
-
-            document.getElementById('btn-batal').addEventListener('click', function (e) {
-            e.preventDefault();
-            Swal.fire({
-                title: 'Yakin batal?',
-                text: "Data belum disimpan akan hilang.",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#aaa',
-                confirmButtonText: 'Ya, batalkan',
-                cancelButtonText: 'Kembali'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = "{{ route('order.index') }}";
-                }
-            })
-        });
     </script>
 @endpush

@@ -19,7 +19,9 @@ Route::middleware('auth')->group(function () {
 
     // Resource routes
     Route::resource('users', UserController::class);
+
     Route::resource('customers', CustomerController::class);
+
     Route::resource('debts', DebtController::class);
     
     Route::resource('order', OrderController::class);
@@ -32,15 +34,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/payments/detail', [PaymentController::class, 'detail'])->name('payments.detail');
     Route::get('/payments/paid', [PaymentController::class, 'index'])->name('payments.index');
 
-    Route::prefix('pengaturan')->group(function () {
-    Route::resource('bahan-cetak', BahanCetakController::class)
-        ->names([
-            'index' => 'bahan-cetak.index',
-            'store' => 'bahan-cetak.store',
-            'update' => 'bahan-cetak.update',
-            'destroy' => 'bahan-cetak.destroy'
-        ]);
-    });
+    Route::resource('bahan-cetak', BahanCetakController::class);
 
     // Hanya untuk admin/superadmin
     Route::middleware('role:superadmin,admin')->group(function () {
@@ -51,7 +45,9 @@ Route::middleware('auth')->group(function () {
         Route::prefix('reports')->name('reports.')->group(function() {
             Route::get('/', [ReportController::class, 'index'])->name('index');
             Route::get('/export', [ReportController::class, 'export'])->name('export');
+            Route::get('/income', [ReportController::class, 'incomeReport'])->name('reports.income');
         });
+
 
         // Database Backup
         Route::prefix('admin/database')->name('backup.')->group(function() {

@@ -12,10 +12,9 @@
 
     <div class="header">
         <h1 class="page-title">Dashboard</h1>
-        <button class="btn btn-primary">
-            <i class="fas fa-plus"></i>
-            Tambah Order Baru
-        </button>
+        <div class="text-end">
+            <a class="btn btn-primary" href="{{ route('order.create') }}"><i class="fas fa-plus"></i> Tambah Order Baru</a>
+        </div>
     </div>
 
     <!-- Summary Cards -->
@@ -25,10 +24,10 @@
                 <i class='bx bx-edit-alt service-ketik'></i>
             </div>
             <h3 class="card-title">Jasa Ketik</h3>
-            <div class="card-value">18</div>
-            <div class="card-change positive">
-                <i class='bx bx-up-arrow-alt'></i>
-                <span>+2 dari kemarin</span>
+            <div class="card-value">{{ $typingToday }}</div>
+            <div class="card-change {{ $typingChange >= 0 ? 'positive' : 'negative' }}">
+                <i class='bx {{ $typingChange >= 0 ? 'bx-up-arrow-alt' : 'bx-down-arrow-alt' }}'></i>
+                <span> {{ $typingChange >= 0 ? '+' : '' }}{{ $typingChange }} dari kemarin</span>
             </div>
         </div>
         
@@ -37,10 +36,10 @@
                 <i class='bx bx-palette summary-icon service-desain'></i>
             </div>
             <h3 class="card-title">Jasa Desain</h3>
-            <div class="card-value">9</div>
-            <div class="card-change positive">
-                <i class='bx bx-up-arrow-alt'></i>
-                <span>+1 dari kemarin</span>
+            <div class="card-value">{{ $designToday }}</div>
+            <div class="card-change {{ $designChange >= 0 ? 'positive' : 'negative' }}">
+                <i class='bx {{ $typingChange >= 0 ? 'bx-up-arrow-alt' : 'bx-down-arrow-alt' }}'></i>
+                <span> {{ $designChange >= 0 ? '+' : '' }}{{ $designChange }} dari kemarin</span>
             </div>
         </div>
         
@@ -49,10 +48,10 @@
                 <i class='bx bx-printer summary-icon service-cetak'></i>
             </div>
             <h3 class="card-title">Percetakan</h3>
-            <div class="card-value">15</div>
-            <div class="card-change negative">
-                <i class='bx bx-down-arrow-alt'></i>
-                <span>-3 dari kemarin</span>
+            <div class="card-value">{{ $printToday }}</div>
+            <div class="card-change {{ $printChange >= 0 ? 'positive' : 'negative' }}">
+                <i class='bx {{ $typingChange >= 0 ? 'bx-up-arrow-alt' : 'bx-down-arrow-alt' }}'></i>
+                <span> {{ $printChange >= 0 ? '+' : '' }}{{ $printChange }} dari kemarin</span>
             </div>
         </div>
         
@@ -61,10 +60,10 @@
                 <i class='bx bx-money summary-icon hutang'></i>
             </div>
             <h3 class="card-title">Sisa Hutang</h3>
-            <div class="card-value">Rp 0</div>
-            <div class="card-change positive">
-                <i class='bx bx-up-arrow-alt'></i>
-                <span>+2 Customers</span>
+            <div class="card-value">Rp {{ number_format($remainingDebt, 0, ',', '.') }}</div>
+            <div class="card-change {{ $customerDebtDifference >= 0 ? 'positive' : 'negative' }}">
+                <i class='bx  {{ $customerDebtDifference >= 0 ? 'bx-up-arrow-alt' : 'bx-down-arrow-alt' }}'></i>
+                <span>{{ $customerDebtDifference >= 0 ? '+' : '' }}{{ $customerDebtDifference }} Customers</span>
             </div>
         </div>
     </div>
@@ -73,11 +72,11 @@
         <div class="col-6">
             <div class="card mb-3">
                 <h4 class="card-header d-flex justify-content-between">
-                    Daftar Order Hari Ini
-                    <a href="#" class="see-all">Lihat Semua</a>
+                    Daftar Order Terakhir
+                    <a href="{{ route('order.index') }}" class="see-all">Lihat Semua</a>
                 </h4>
                 
-                <table class="table">
+                <table class="table table-hover">
                     <thead>
                         <tr>
                             <th>NO. ORDER</th>
@@ -87,46 +86,51 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>PRT-2023-156</td>
-                            <td>Budi Santoso</td>
-                            <td>Ketik Dokumen</td>
-                            <td>
-                                <span class="badge bg-label-primary">DALAM PENGERJAAN</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>PRT-2023-157</td>
-                            <td>Siti Aminah</td>
-                            <td>Desain Brosur</td>
-                            <td>
-                                <span class="badge bg-label-warning">MENUNGGU KONFIRMASI</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>PRT-2023-158</td>
-                            <td>Andi Wijaya</td>
-                            <td>Cetak Banner</td>
-                            <td>
-                                <span class="badge bg-label-success">SELESAI</span>
-                            </td>
-                        </tr>
-                        <tr class="urgent">
-                            <td>PRT-2023-159</td>
-                            <td>Dewi Lestari</td>
-                            <td>Paket Komplit</td>
-                            <td>
-                                <span class="badge bg-label-danger">DIAJUKAN</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>PRT-2023-156</td>
-                            <td>Budi Santoso</td>
-                            <td>Ketik Dokumen</td>
-                            <td>
-                                <span class="badge bg-label-primary">DALAM PENGERJAAN</span>
-                            </td>
-                        </tr>
+                        @forelse ($latestOrders as $order)
+                            <tr class="clickable-row" data-href="{{ route('order.show', $order->id) }}">
+                                <td>{{ $order->id }}</td>
+                                <td>{{ $order->customer->name ?? '-' }}</td>
+                                <td>@foreach ($order->services as $svc)
+                                        <span class="service-tag service-{{ strtolower($svc) }}">
+                                            @if ($svc == 'Ketik') <i class="fas fa-keyboard me-1"></i> @endif
+                                            @if ($svc == 'Desain') <i class="fas fa-palette me-1"></i> @endif
+                                            @if ($svc == 'Cetak') <i class="fas fa-print me-1"></i> @endif
+                                            {{ $svc }}
+                                        </span>
+                                    @endforeach
+                                </td>
+                                <td>
+                                    @php
+                                        $statusClass = match($order->status) {
+                                            'Menunggu' => 'badge bg-secondary',
+                                            'Dikerjakan' => 'badge bg-warning text-dark',
+                                            'Selesai' => 'badge bg-success',
+                                            'Diambil' => 'badge bg-primary',
+                                            'Batal' => 'badge bg-danger',
+                                            default => 'badge bg-light text-dark',
+                                        };
+                                        $statusIcon = match($order->status) {
+                                            'Menunggu' => 'fas fa-clock',
+                                            'Dikerjakan' => 'fas fa-spinner',
+                                            'Selesai' => 'fas fa-check-circle',
+                                            'Diambil' => 'fas fa-motorcycle',
+                                            'Batal' => 'fas fa-times',
+                                            default => '',
+                                        };
+                                    @endphp
+                                    <span class="{{ $statusClass }}">
+                                        @if ($statusIcon)
+                                            <i class="{{ $statusIcon }} me-1"></i>
+                                        @endif
+                                        {{ $order->status }}
+                                    </span>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="4" class="text-center">Tidak ada order terbaru.</td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
@@ -135,58 +139,49 @@
             <div class="card mb-3">
                 <h4 class="card-header d-flex justify-content-between">
                     Order yang Terlambat
-                    <a href="#" class="see-all">Lihat Semua</a>
+                    <a href="{{ route('order.index') }}" class="see-all">Lihat Semua</a>
                 </h4>
                 <table class="table">
                     <thead>
                         <tr>
                             <th>NO. ORDER</th>
                             <th>PELANGGAN</th>
-                            <th>JENIS ORDER</th>
-                            <th>KETERLAMBATAN</th>
+                            <th>LAYANAN</th>
+                            <th>DEADLINE</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td class="urgent">PRT-2023-151</td>
-                            <td>Ahmad Fauzi</td>
-                            <td>Desain Logo</td>
-                            <td>
-                                <span class="badge bg-danger">2 HARI</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="urgent">PRT-2023-152</td>
-                            <td>Rina Melati</td>
-                            <td>Cetak Undangan</td>
-                            <td>
-                                <span class="badge bg-danger">1 HARI</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>PRT-2023-153</td>
-                            <td>Joko Prasetyo</td>
-                            <td>Ketik Skripsi</td>
-                            <td>
-                                <span class="badge bg-warning">HARI INI</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>PRT-2023-154</td>
-                            <td>Linda Sari</td>
-                            <td>Paket Komplit</td>
-                            <td>
-                                <span class="badge bg-info">BESOK DEADLINE</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="urgent">PRT-2023-152</td>
-                            <td>Rina Melati</td>
-                            <td>Cetak Undangan</td>
-                            <td>
-                                <span class="badge bg-danger">1 HARI</span>
-                            </td>
-                        </tr>
+                        @forelse($lateOrders as $order)
+                            @php
+                                $deadline = \Carbon\Carbon::parse($order->deadline)->startOfDay();
+                                $today = \Carbon\Carbon::today();
+                                $isLate = $deadline->lt($today);
+                                $deadlineDiff = $today->diffInDays($deadline, false); // minus jika sudah lewat
+                            @endphp
+                            <tr onclick="window.location='{{ route('order.show', $order->id) }}'" style="cursor:pointer;">
+                                <td class="{{ $isLate ? 'urgent' : '' }}">{{ $order->id }}</td>
+                                <td>{{ $order->customer->name }}</td>
+                                <td>@foreach ($order->services as $svc)
+                                        <span class="service-tag service-{{ strtolower($svc) }}">
+                                            @if ($svc == 'Ketik') <i class="fas fa-keyboard me-1"></i> @endif
+                                            @if ($svc == 'Desain') <i class="fas fa-palette me-1"></i> @endif
+                                            @if ($svc == 'Cetak') <i class="fas fa-print me-1"></i> @endif
+                                            {{ $svc }}
+                                        </span>
+                                    @endforeach
+                                </td>
+                                <td>
+                                    <span class="badge {{ $isLate ? 'bg-danger' : 'bg-warning text-dark' }}">
+                                    <i class="fas fa-calendar-times me-1"></i>
+                                    {{ $isLate ? abs($deadlineDiff) . ' HARI TERLAMBAT' : 'SISA ' . $deadlineDiff . ' HARI' }}
+                                </span>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">Tidak ada order yang terlambat.</td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
@@ -270,6 +265,19 @@
             </nav>
         @endif
     </div>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const rows = document.querySelectorAll('.clickable-row');
+
+        rows.forEach(row => {
+            row.addEventListener('click', function () {
+                window.location = this.dataset.href;
+            });
+        });
+    });
+</script>
 @endsection
 
 

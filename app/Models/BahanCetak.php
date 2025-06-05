@@ -18,6 +18,10 @@ class BahanCetak extends Model
         'ukuran',
     ];
 
+    public function orders()
+    {
+        return $this->hasMany(Order::class, 'bahan_cetak_id');
+    }
 
     // Scope untuk pencarian
     public function scopeSearch($query, $search)

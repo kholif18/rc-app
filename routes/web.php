@@ -43,9 +43,10 @@ Route::middleware('auth')->group(function () {
 
         // Reports
         Route::prefix('reports')->name('reports.')->group(function() {
-            Route::get('/', [ReportController::class, 'index'])->name('index');
+            Route::get('/debt', [ReportController::class, 'debtReport'])->name('debt');
             Route::get('/export', [ReportController::class, 'export'])->name('export');
-            Route::get('/income', [ReportController::class, 'incomeReport'])->name('reports.income');
+            Route::get('/order', [ReportController::class, 'orderReport'])->name('order');
+            Route::get('/order/export', [ReportController::class, 'exportReportOrder'])->name('order.export');
         });
 
 

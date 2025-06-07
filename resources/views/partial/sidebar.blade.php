@@ -65,29 +65,30 @@
                 </a>
             </li>
 
-            <li class="menu-item  {{ Request::is('bahan-cetak.index*') ? 'active' : '' }}">
+            <li class="menu-item  {{ Request::is('bahan-cetak*') ? 'active' : '' }}">
                 <a href="{{ route('bahan-cetak.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-paper-plane"></i>
                 <div data-i18n="Bahan Cetak">Bahan Cetak</div>
                 </a>
             </li>
 
-            <li class="menu-header small text-uppercase">
-                <span class="menu-header-text">Laporan</span>
-            </li>
-
-            <li class="menu-item  {{ Request::is('reports*') ? 'active' : '' }}">
-                <a href="{{ route('reports.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bxs-report"></i>
-                <div data-i18n="Basic">Reports</div>
+            <li class="menu-item {{ Request::is('reports/*') ? 'open active' : '' }}">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons bx bx-bar-chart-square"></i>
+                    <div data-i18n="Reports">Reports</div>
                 </a>
-            </li>
-            
-            <li class="menu-item  {{ Request::is('#') ? 'active' : '' }}">
-                <a href="#" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-line-chart"></i>
-                <div data-i18n="Basic">Pendapatan</div>
-                </a>
+                <ul class="menu-sub">
+                    <li class="menu-item {{ Request::is('reports/debt') ? 'active' : '' }}">
+                    <a href="{{ route('reports.debt') }}" class="menu-link">
+                        <div data-i18n="Debt">Debt</div>
+                    </a>
+                    </li>
+                    <li class="menu-item {{ Request::is('reports/order') ? 'active' : '' }}">
+                    <a href="{{ route('reports.order') }}" class="menu-link">
+                        <div data-i18n="Order">Order</div>
+                    </a>
+                    </li>
+                </ul>
             </li>
 
             <li class="menu-header small text-uppercase">

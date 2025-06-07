@@ -19,7 +19,7 @@
             <h5 class="mb-0">Laporan Hutang dan Pembayaran</h5>
         </div>
         <div class="card-body">
-            <form method="GET" action="{{ route('reports.index') }}" class="row mb-4 g-3 align-items-end">
+            <form method="GET" action="{{ route('reports.debt') }}" class="row mb-4 g-3 align-items-end">
                 <div class="col-md-3">
                     <label class="form-label">Dari Tanggal:</label>
                     <input type="date" name="from" value="{{ $from }}" class="form-control">
@@ -32,7 +32,7 @@
                     <button class="btn btn-primary">
                         <i class="fas fa-filter"></i> Filter
                     </button>
-                    <a href="{{ route('reports.index') }}" class="btn btn-secondary">
+                    <a href="{{ route('reports.debt') }}" class="btn btn-secondary">
                         <i class="fas fa-sync-alt"></i> Reset
                     </a>
                 </div>

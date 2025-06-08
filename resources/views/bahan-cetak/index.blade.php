@@ -77,7 +77,7 @@
                 </select>
             </div>
             <div class="col-2 mt-3">
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tambahBahanModal">Tambah Bahan</button>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" id="btnTambahBahan" data-bs-target="#tambahBahanModal">Tambah Bahan</button>
             </div>
         </div>
 
@@ -164,6 +164,18 @@
             toastElements.forEach(function (toastEl) {
                 const toast = new bootstrap.Toast(toastEl, { delay: 4000 }); // 4 detik
                 toast.show();
+            });
+
+            const modal = document.getElementById('tambahBahanModal');
+            const trigger = document.getElementById('btnTambahBahan');
+
+            modal.addEventListener('shown.bs.modal', function () {
+                document.getElementById('nama_bahan').focus();
+            });
+
+            modal.addEventListener('hidden.bs.modal', function () {
+                // Fokus kembali ke tombol pembuka modal
+                if (trigger) trigger.focus();
             });
         });
 

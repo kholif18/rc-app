@@ -66,7 +66,7 @@
                 </form>
             </div>
             <div class="col-3 text-center">
-                <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#addCustomerModal">Tambah Pelanggan</button>
+                <button type="button" id="btnTambahCustomer" class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#addCustomerModal">Tambah Pelanggan</button>
             </div>
         </div>
 
@@ -169,6 +169,18 @@
             toastElements.forEach(function (toastEl) {
                 const toast = new bootstrap.Toast(toastEl, { delay: 4000 }); // 4 detik
                 toast.show();
+            });
+
+            const modal = document.getElementById('addCustomerModal');
+            const trigger = document.getElementById('btnTambahCustomer');
+
+            modal.addEventListener('shown.bs.modal', function () {
+                document.getElementById('name').focus();
+            });
+
+            modal.addEventListener('hidden.bs.modal', function () {
+                // Fokus kembali ke tombol pembuka modal
+                if (trigger) trigger.focus();
             });
         });
 

@@ -2,11 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Carbon\Carbon;
 use App\Models\Debt;
 use App\Models\Order;
-use App\Exports\OrderReportExport;
-use App\Models\Report;
 use App\Models\Payment;
 use Illuminate\Http\Request;
 use App\Exports\ReportExport;
@@ -49,10 +46,14 @@ class ReportController extends Controller
         $from = $request->input('from') ?? now()->startOfMonth()->toDateString();
         $to = $request->input('to') ?? now()->toDateString();
 
-        $query = Order::query();
+        // Debug tanggal
+        logger("Filter date: $from - $to");
 
-        // Filter tanggal
-        $query->whereBetween('created_at', [$from, $to]);
+        $query = Order::with(['customer', 'bahanCetak']);
+
+        // Filter tanggal (lebih robust)
+        $query->whereDate('created_at', '>=', $from)
+            ->whereDate('created_at', '<=', $to);
 
         // Filter jenis layanan jika ada
         if ($request->filled('services')) {
@@ -69,8 +70,9 @@ class ReportController extends Controller
 
         // Summary data
         $totalOrders = $query->count();
-        $completedOrders = (clone $query)->where('status', 'Selesai')->count();
-        $processingOrders = (clone $query)->where('status', 'Proses')->count();
+        $completedStatuses = ['Selesai', 'Diambil'];
+        $completedOrders = (clone $query)->whereIn('status', $completedStatuses)->count();
+        $processingOrders = (clone $query)->where('status', 'Dikerjakan')->count();
         $canceledOrders = (clone $query)->where('status', 'Batal')->count();
 
         return view('reports.order', compact(
@@ -132,16 +134,28 @@ class ReportController extends Controller
             $query->where('status', $status);
         }
 
-        $orders = $query->with('customer', 'bahanCetak')->get();
+        if ($format == 'pdf') {
+            $orders = $query->get(); // Ambil data order-nya
+
+            $totalOrders = $orders->count();
+            $completedStatuses = ['Selesai', 'Diambil'];
+            $completedOrders = $orders->whereIn('status', $completedStatuses)->count();
+            $processingOrders = $orders->where('status', 'Dikerjakan')->count();
+            $canceledOrders = $orders->where('status', 'Batal')->count();
+
+            $pdf = PDF::loadView('reports.order-pdf', compact(
+                'from', 'to', 'services', 'status', 'orders',
+                'totalOrders', 'completedOrders', 'processingOrders', 'canceledOrders'
+            ));
+
+            return $pdf->stream("laporan_{$from}_sd_{$to}.pdf");
+        }
 
         if ($format == 'excel') {
             // Export ke Excel
+            $orders = $query->get();
             return Excel::download(new \App\Exports\OrderReportExport($orders), 'order-report.xlsx');
-        } elseif ($format == 'pdf') {
-            // Export ke PDF
-            $pdf = PDF::loadView('reports.order-pdf', compact('orders', 'from', 'to'));
-            return $pdf->download('order-report.pdf');
-        }
+        } 
 
         return redirect()->route('reports.order')->with('error', 'Format export tidak valid.');
     }

@@ -98,40 +98,4 @@ class BackupController extends Controller
 
         return back()->with('success', 'Database berhasil diimport!');
     }
-    
-    // public function import(Request $request)
-    // {
-    //     $request->validate([
-    //         'sql_file' => 'required|file|mimes:txt,sql',
-    //     ]);
-    //     if ($errors = $request->getSession()->get('errors')) {
-    //         dd($errors->all());
-    //     }
-    //     $file = $request->file('sql_file');
-    //     $path = $file->storeAs('backups', 'import-temp.sql');
-    //     $fullPath = storage_path("app/{$path}");
-
-    //     $db = config('database.connections.mysql');
-    //     $host = 'mariadb-db-1'; // Ganti sesuai nama container MySQL kamu
-    //     $fullPath = storage_path("app/{$path}");
-
-    //     $command = sprintf(
-    //         'mysql -h%s -u%s -p%s %s < %s',
-    //         escapeshellarg($host),
-    //         escapeshellarg($db['username']),
-    //         escapeshellarg($db['password']),
-    //         escapeshellarg($db['database']),
-    //         escapeshellarg($fullPath)
-    //     );
-
-    //     $result = null;
-    //     $output = null;
-    //     exec($command, $output, $result);
-
-    //     if ($result === 0) {
-    //         return back()->with('success', 'Import database berhasil.');
-    //     } else {
-    //         return back()->with('error', 'Gagal mengimport database.');
-    //     }
-    // }
 }

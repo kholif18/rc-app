@@ -47,7 +47,7 @@
                 </a>
             </li>
 
-            <li class="menu-item  {{ Request::is('payments.index*') ? 'active' : '' }}">
+            <li class="menu-item  {{ Request::is('payments*') ? 'active' : '' }}">
                 <a href="{{ route('payments.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-dollar"></i>
                 <div data-i18n="Lunas">Lunas</div>

@@ -95,6 +95,10 @@
                         <div class="alert alert-danger mt-3">
                             <i class="fas fa-ban me-1"></i> Order ini telah dibatalkan dan tidak bisa diubah.
                         </div>
+                    @elseif($order->status === 'Diambil')
+                        <div class="alert alert-success mt-3">
+                            <i class="fas fa-check-circle me-1"></i> Order ini telah diambil dan tidak bisa diubah.
+                        </div>
                     @endif
                 </div>
                 <div class="row mb-4">
@@ -219,14 +223,14 @@
                 <div class="d-flex justify-content-between">
                     <button type="button" class="btn btn-danger"
                             data-bs-toggle="modal" data-bs-target="#cancelModal"
-                            @if($order->status === 'Batal') disabled @endif>
+                            @if($order->status === 'Batal' || $order->status === 'Diambil') disabled @endif>
                         <i class="fas fa-times-circle me-1"></i> Batalkan Order
                     </button>
 
                     <div>
                         <button type="button" class="btn btn-success"
                                 data-bs-toggle="modal" data-bs-target="#statusModal"
-                                @if($order->status === 'Batal') disabled @endif>
+                                @if($order->status === 'Batal' || $order->status === 'Diambil') disabled @endif>
                             <i class="fas fa-edit me-1"></i> Update Status
                         </button>
                     </div>
@@ -246,36 +250,42 @@
                         <h6>Order Dibuat</h6>
                         <p class="text-muted small mb-1">{{ $order->created_at->format('d M Y, H:i') }}</p>
                         <p class="small">
-                            Order dibuat oleh {{ $order->user->name ?? 'Admin' }}
-                            @if($order->user)
-                                ({{ $order->user->role }})
-                            @endif
+                            Order dibuat oleh {{ $order->user->name }}
+                            <span class="badge bg-secondary">{{ $order->user->role }}</span>
                         </p>
                     </div>
 
                     @foreach($order->progress->sortBy('created_at') as $progress)
                         <div class="timeline-item">
                             <h6>
-                                @if ($progress->status == 'Menunggu')
-                                    <i class="fas fa-clock me-1 text-warning"></i>Menunggu
-                                @elseif ($progress->status == 'Dikerjakan')
-                                    <i class="fas fa-spinner me-1 text-primary"></i>Dalam Pengerjaan
-                                @elseif ($progress->status == 'Selesai')
-                                    <i class="fas fa-check-circle me-1 text-success"></i>Selesai
-                                @elseif ($progress->status == 'Diambil')
-                                    <i class="fas fa-motorcycle me-1 text-info"></i>Sudah Diambil
-                                @elseif ($progress->status == 'Batal')
-                                    <i class="fas fa-times-circle me-1 text-danger"></i>Dibatalkan
-                                @else
-                                    <i class="fas fa-info-circle me-1"></i>{{ $progress->status }}
-                                @endif
+                                @switch($progress->status)
+                                    @case('Menunggu')
+                                        <i class="fas fa-clock me-1 text-warning"></i>Menunggu
+                                        @break
+                                    @case('Dikerjakan')
+                                        <i class="fas fa-spinner me-1 text-primary"></i>Dalam Pengerjaan
+                                        @break
+                                    @case('Selesai')
+                                        <i class="fas fa-check-circle me-1 text-success"></i>Selesai
+                                        @break
+                                    @case('Diambil')
+                                        <i class="fas fa-motorcycle me-1 text-info"></i>Sudah Diambil
+                                        @break
+                                    @case('Batal')
+                                        <i class="fas fa-times-circle me-1 text-danger"></i>Dibatalkan
+                                        @break
+                                    @default
+                                        <i class="fas fa-info-circle me-1"></i>{{ $progress->status }}
+                                @endswitch
                             </h6>
                             <p class="text-muted small mb-1">{{ \Carbon\Carbon::parse($progress->created_at)->format('d M Y, H:i') }}</p>
                                 <p class="small">
-                                    {{ $progress->note }}
-                                    {{ $progress->user->name ?? 'Admin' }}
+                                    @if($progress->note)
+                                        {{ $progress->note }} - 
+                                    @endif
+                                    Diubah oleh: {{ $progress->user->name ?? 'Admin' }}
                                     @if($progress->user)
-                                        ({{ $progress->user->role }})
+                                        ({{ $progress->user->role->name ?? $progress->user->role }})
                                     @endif
                                 </p>
                         </div>
@@ -298,9 +308,7 @@
                     @foreach ($order->internalNotes()->latest()->get() as $note)
                         <div class="d-flex mb-2">
                             <div class="flex-shrink-0">
-                                <img src="{{ $note->user && $note->user->avatar !== 'avatar.png'
-                                    ? asset('storage/avatars/' . $note->user->avatar)
-                                    : asset('avatar.png') }}"
+                                <img src="{{ asset('storage/avatars/' . ($note->user->avatar ?? 'avatar.png')) }}"
                                     alt="{{ $note->user->name ?? 'User' }}"
                                 class="rounded-circle"
                                 width="40"

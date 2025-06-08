@@ -14,9 +14,13 @@ return new class extends Migration
         Schema::create('order_progress', function (Blueprint $table) {
             $table->id();
             $table->foreignId('order_id')->constrained()->onDelete('cascade');
+            $table->unsignedBigInteger('user_id')->nullable();
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
             $table->string('status'); // status baru
             $table->text('note')->nullable(); // catatan progress
             $table->timestamps();
+
+            $table->index('order_id');
         });
     }
 

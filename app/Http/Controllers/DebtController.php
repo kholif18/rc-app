@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Debt;
 use App\Models\Customer;
 use Illuminate\Http\Request;
-use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
 
@@ -18,46 +18,42 @@ class DebtController extends Controller
     {
         $search = $request->input('search');
         $perPage = 10;
-        $page = $request->input('page', 1);
 
-        // Ambil customer yang punya hutang dan sesuai filter
-        $query = Customer::whereHas('debts')
-            ->when($search, function ($query, $search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('phone', 'like', "%{$search}%")
-                    ->orWhere('address', 'like', "%{$search}%");
-                });
-            })
-            ->with('debts.payments')
-            ->get();
+        // Query dengan join dan aggregate
+        $query = DB::table('customers')
+            ->join('debts', 'debts.customer_id', '=', 'customers.id')
+            ->leftJoin('payments', 'payments.debt_id', '=', 'debts.id')
+            ->select(
+                'customers.id',
+                'customers.name',
+                'customers.phone',
+                'customers.address',
+                DB::raw('MAX(debts.created_at) as last_debt_date'),
+                DB::raw('MAX(debts.note) as last_debt_note'),
+                DB::raw('MAX(debts.id) as last_debt_id'),
+                DB::raw('COALESCE(SUM(debts.amount), 0) as total_debt_amount'),
+                DB::raw('COALESCE(SUM(payments.amount), 0) as total_paid_amount'),
+                DB::raw('(COALESCE(SUM(debts.amount), 0) - COALESCE(SUM(payments.amount), 0)) as total_debt')
+            )
+            ->groupBy('customers.id', 'customers.name', 'customers.phone', 'customers.address');
 
-        // Hitung total hutang dikurangi pembayaran
-        $filtered = $query->map(function ($customer) {
-            $totalDebt = $customer->debts->sum('amount');
-            $totalPaid = $customer->debts->flatMap->payments->sum('amount');
-            $customer->total_debt = $totalDebt - $totalPaid;
-            return $customer;
-        })->filter(function ($customer) {
-            return $customer->total_debt > 0;
-        })->values(); // pastikan index array rapi (0,1,2,...)
+        // Filter search jika ada
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('customers.name', 'like', "%{$search}%")
+                ->orWhere('customers.phone', 'like', "%{$search}%")
+                ->orWhere('customers.address', 'like', "%{$search}%");
+            });
+        }
 
-        // Buat pagination manual
-        $paginated = new LengthAwarePaginator(
-            $filtered->forPage($page, $perPage),
-            $filtered->count(),
-            $perPage,
-            $page,
-            [
-                'path' => url()->current(),
-                'query' => $request->query(),
-            ]
-        );
+        // Filter hanya yang punya total hutang lebih dari 0
+        $query->having('total_debt', '>', 0);
 
-        return view('debts.index', [
-            'customers' => $paginated,
-            'search' => $search,
-        ]);
+        // Pagination otomatis
+        $customers = $query->paginate($perPage)->withQueryString();
+
+        $totalRemainingDebt = $customers->sum('total_debt');
+        return view('debts.index', compact('customers', 'search', 'totalRemainingDebt'));
     }
 
     /**
@@ -77,7 +73,7 @@ class DebtController extends Controller
         $validated = $request->validate([
             'customer_id' => 'required|exists:customers,id',
             'amount' => 'required|numeric|min:0',
-            'note' => 'nullable|string'
+            'note' => 'nullable|string|max:255'
         ]);
         
         // Simpan data hutang
@@ -89,20 +85,6 @@ class DebtController extends Controller
         ]);
         
         return redirect()->route('debts.index')->with('success', 'Hutang berhasil dicatat.');
-        // $validated = $request->validate([
-        //     'customer_id' => 'required|exists:customers,id',
-        //     'amount' => 'required|numeric|min:0.01',
-        //     'note' => 'nullable|string',
-        // ]);
-
-        // // BUAT entri hutang baru, bukan update yang lama
-        // Debt::create([
-        //     'customer_id' => $validated['customer_id'],
-        //     'amount' => $validated['amount'],
-        //     'note' => $validated['note'],
-        // ]);
-
-        // return redirect()->route('debts.index')->with('success', 'Hutang berhasil dicatat.');
     }
 
     /**

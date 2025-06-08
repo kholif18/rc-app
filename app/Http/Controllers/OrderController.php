@@ -3,8 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\BahanCetak;
-use id;
-use App\Models\Debt;
 use App\Models\Order;
 use App\Models\Customer;
 use App\Models\OrderFile;
@@ -173,10 +171,16 @@ class OrderController extends Controller
 
     public function show($orderId)
     {
-        $order = Order::with(['progress.user'])->findOrFail($orderId);
-        $progresses = $order->progress()->with('user')->orderBy('created_at', 'desc')->get();
+        $order = Order::with([
+            'progress' => function($query) {
+                $query->latest();
+            },
+            'progress.user',
+            'user',
+            'customer'
+        ])->findOrFail($orderId);
 
-        return view('order.show', compact('order', 'progresses'));
+        return view('order.show', compact('order'));
     }
     /**
      * Show the form for editing the specified resource.
@@ -212,22 +216,22 @@ class OrderController extends Controller
 
     public function updateStatus(Request $request, Order $order)
     {
-        $request->validate([
-            'status' => 'required|string',
-            'note' => 'nullable|string',
+        $validated = $request->validate([
+            'status' => 'required|in:Menunggu,Dikerjakan,Selesai,Diambil,Batal',
+            'note' => 'nullable|string|max:500',
         ]);
 
-        // Update status utama di tabel orders
-        $order->update(['status' => $request->status]);
-
-        // Simpan catatan progress ke tabel order_progress
+        // Simpan progress baru
         $order->progress()->create([
-            'status' => $request->status,
-            'note' => $request->note,
-            'user_id' => Auth::id(), 
+            'status' => $validated['status'],
+            'note' => $validated['note'],
+            'user_id' => Auth::id()
         ]);
 
-        return redirect()->back()->with('success', 'Status dan catatan progress berhasil diperbarui.');
+        // Update status order utama
+        $order->update(['status' => $validated['status']]);
+
+        return back()->with('success', 'Status berhasil diperbarui');
     }
 
     /**

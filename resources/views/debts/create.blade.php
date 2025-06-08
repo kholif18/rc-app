@@ -68,15 +68,6 @@
                             id="customer_id" 
                             value="{{ old('customer_id') }}">
                     </div>
-                    {{-- <label for="customer_id" class="form-label">Pelanggan</label>
-                    <select name="customer_id" id="customer_id" class="form-select select2" required>
-                        @foreach ($customers as $customer)
-                            <option value="{{ $customer->id }}" {{ old('customer_id') == $customer->id ? 'selected' : '' }}>{{ $customer->name }}</option>
-                        @endforeach
-                    </select>
-                    @error('customer_id')
-                        <span class="text-danger">{{ $message }}</span>
-                    @enderror --}}
                 </div>
                 <div class="mb-3">
                     <label for="amount" class="form-label">Jumlah Hutang</label>
@@ -130,11 +121,5 @@
                 }
             });
         });
-        // $(document).ready(function() {
-        //     $('#customer_id').select2({
-        //         placeholder: 'Pilih pelanggan',
-        //         allowClear: true
-        //     });
-        // });
     </script>
 @endpush

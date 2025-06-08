@@ -2,7 +2,9 @@
 <html>
 <head>
     <title>Laporan Order</title>
+    <link rel="icon" type="image/x-icon" href="{{ $setting?->favicon ? asset('storage/favicon/' . $setting->favicon) : asset('favicon.png') }}" />
     <style>
+        .summary { margin-bottom: 30px; }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -21,6 +23,28 @@
 <body>
     <h3>Laporan Order</h3>
     <p>Periode: {{ $from }} s.d {{ $to }}</p>
+
+    <div class="summary">
+        <table class="table">
+            <tr>
+                <th>Total Pesanan</th>
+                <td class="text-right text-danger">{{ $totalOrders }}</td>
+            </tr>
+            <tr>
+                <th>Selesai + Diambil</th>
+                <td class="text-right text-success">{{ $completedOrders }}</td>
+            </tr>
+            <tr>
+                <th>Proses</th>
+                <td class="text-right">{{ $processingOrders }}</td>
+            </tr>
+            <tr>
+                <th>Batal</th>
+                <td class="text-right">{{ $canceledOrders }}</td>
+            </tr>
+        </table>
+    </div>
+
     <table>
         <thead>
             <tr>

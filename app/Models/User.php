@@ -3,9 +3,10 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
@@ -31,6 +32,17 @@ class User extends Authenticatable
         'password' => 'hashed',
         'last_activity' => 'datetime', // supaya otomatis jadi Carbon instance
     ];
+
+    public function getAvatarUrlAttribute()
+    {
+        if ($this->avatar && $this->avatar !== 'avatar.png') {
+            $path = 'public/avatars/'.$this->avatar;
+            return Storage::exists($path) 
+                ? Storage::url($path)
+                : asset('avatar.png');
+        }
+        return asset('avatar.png');
+    }
 
     // User dianggap online jika last_activity kurang dari 5 menit yang lalu
     public function getIsOnlineAttribute()

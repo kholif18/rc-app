@@ -4,42 +4,37 @@ namespace App\Http\Controllers;
 
 use App\Models\Debt;
 use App\Models\Order;
-// use Illuminate\Http\Request;
-use App\Models\Payment;
 use App\Models\Customer;
 use Carbon\Carbon;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        
-        // Ambil daftar pelanggan yang punya hutang saat ini
-        $currentCustomersWithDebt = Customer::whereHas('debts', function ($query) {
-            $query->selectRaw('customer_id, SUM(amount) as total_debt')
-                ->groupBy('customer_id');
-        })->get()->filter(function ($customer) {
-            $totalDebt = $customer->debts->sum('amount');
-            $totalPaid = $customer->debts->flatMap->payments->sum('amount');
-            return $totalDebt - $totalPaid > 0;
-        });
+        $currentCustomerIds = Customer::with('debts.payments')
+            ->get()
+            ->filter(function ($customer) {
+                $totalDebt = $customer->debts->sum('amount');
+                $totalPaid = $customer->debts->flatMap->payments->sum('amount');
+                return $totalDebt - $totalPaid > 0;
+            })
+            ->pluck('id');
 
-        // Misal kamu simpan snapshot data pelanggan berhutang kemarin di session/cache/db (contoh ambil dari cache):
-        $previousCustomersWithDebt = cache()->get('previous_customers_with_debt', collect());
+        $dateKey = 'customers_with_debt_ids_' . now()->toDateString();
 
-        // Hitung jumlah pelanggan berhutang sekarang dan sebelumnya
-        $currentCount = $currentCustomersWithDebt->count();
-        $previousCount = $previousCustomersWithDebt->count();
-
-        // Hitung selisih perubahan pelanggan berhutang
-        $customerDebtDifference = $currentCount - $previousCount;
-
-        // Simpan snapshot untuk perhitungan berikutnya (misal untuk keesokan hari)
-        cache()->put('previous_customers_with_debt', $currentCustomersWithDebt, now()->addDay());
-        
+        $previousCustomerIds = cache()->get($dateKey);
+        // Hitung selisih
+        if ($previousCustomerIds) {
+            $customerDebtDifference = $currentCustomerIds->count() - collect($previousCustomerIds)->count();
+        } else {
+            $customerDebtDifference = 0;
+            cache()->put($dateKey, $currentCustomerIds, now()->endOfDay());
+        }
+        // Simpan hanya jika belum tersimpan hari ini
+        if (!cache()->has('previous_customers_with_debt_ids')) {
+            cache()->put('previous_customers_with_debt_ids', $currentCustomerIds, now()->addDay());
+        }
         $customers = Customer::with('debts.payments')->get();
 
         // Filter yang punya sisa hutang > 0

@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Pagination\LengthAwarePaginator;
 
 class CustomerController extends Controller
 {
@@ -41,16 +40,6 @@ class CustomerController extends Controller
      */
     public function store(Request $request)
     {
-        // $request->validate([
-        //     'name' => 'required|string|max:255',
-        //     'phone' => 'nullable|string|max:20',
-        //     'email' => 'nullable|email|max:255',
-        //     'address' => 'nullable|string|max:255',
-        // ]);
-
-        // Customer::create($request->all());
-
-        // return redirect()->route('customers.index')->with('success', 'Pelanggan berhasil ditambahkan.');
 
         $validated = $request->validate([
             'name' => 'required|string|max:100',

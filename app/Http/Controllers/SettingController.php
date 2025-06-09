@@ -17,6 +17,10 @@ class SettingController extends Controller
     {
         $request->validate([
             'app_name' => 'nullable|string|max:255',
+            'phone' => 'nullable|string|max:20',
+            'email' => 'nullable|email|max:100',
+            'website' => 'nullable|string|max:100',
+            'address' => 'nullable|string|max:255',
             'logo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'favicon' => 'nullable|image|mimes:jpg,jpeg,png|max:1024',
         ]);
@@ -24,30 +28,34 @@ class SettingController extends Controller
         $setting = Setting::firstOrNew([]);
 
         if ($request->hasFile('logo')) {
-        // Hapus logo lama jika ada
-        if ($setting->logo && file_exists(storage_path('app/public/logo/' . $setting->logo))) {
-            unlink(storage_path('app/public/logo/' . $setting->logo));
+            // Hapus logo lama jika ada
+            if ($setting->logo && file_exists(storage_path('app/public/logo/' . $setting->logo))) {
+                unlink(storage_path('app/public/logo/' . $setting->logo));
+            }
+
+            // Simpan logo baru
+            $logoPath = $request->file('logo')->store('logo', 'public');
+            $setting->logo = basename($logoPath); // Simpan hanya nama file
+        }
+        // Upload Favicon
+        if ($request->hasFile('favicon')) {
+            // Hapus favicon lama jika ada
+            if ($setting->favicon && file_exists(storage_path('app/public/favicon/' . $setting->favicon))) {
+                unlink(storage_path('app/public/favicon/' . $setting->favicon));
+            }
+
+            // Simpan favicon baru
+            $faviconPath = $request->file('favicon')->store('favicon', 'public');
+            $setting->favicon = basename($faviconPath); // Simpan hanya nama file
         }
 
-        // Simpan logo baru
-        $logoPath = $request->file('logo')->store('logo', 'public');
-        $setting->logo = basename($logoPath); // Simpan hanya nama file
-    }
-    // Upload Favicon
-    if ($request->hasFile('favicon')) {
-        // Hapus favicon lama jika ada
-        if ($setting->favicon && file_exists(storage_path('app/public/favicon/' . $setting->favicon))) {
-            unlink(storage_path('app/public/favicon/' . $setting->favicon));
-        }
+        $setting->app_name = $request->app_name;
+        $setting->phone = $request->phone;
+        $setting->email = $request->email;
+        $setting->website = $request->website;
+        $setting->address = $request->address;
+        $setting->save();
 
-        // Simpan favicon baru
-        $faviconPath = $request->file('favicon')->store('favicon', 'public');
-        $setting->favicon = basename($faviconPath); // Simpan hanya nama file
-    }
-
-    $setting->app_name = $request->app_name;
-    $setting->save();
-
-    return redirect()->back()->with('success', 'Pengaturan berhasil diperbarui.');
+        return redirect()->back()->with('success', 'Pengaturan berhasil diperbarui.');
     }
 }

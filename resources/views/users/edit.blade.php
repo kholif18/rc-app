@@ -26,7 +26,7 @@
             @method('PUT')
                 <div class="card-body">
                     <div class="d-flex align-items-start align-items-sm-center gap-4">
-                    <img id="uploadedAvatar" src="{{ asset('storage/avatars/' . ($user->avatar ?? 'avatar.png')) }}"
+                    <img id="uploadedAvatar" src="{{ $user->avatar ? asset('storage/avatars/' . $user->avatar) : asset('avatar.png') }}"
                         alt="user-avatar"
                         class="d-block rounded"
                         height="100"
@@ -78,10 +78,10 @@
                                     @if(auth()->id() === $user->id && $user->role === 'superadmin')
                                         {{-- Superadmin mengedit dirinya sendiri: tampilkan role sebagai readonly --}}
                                         <input type="hidden" name="role" value="{{ $user->role }}">
-                                        <input type="text" class="form-control" value="{{ ucfirst($user->role) }}" readonly>
+                                        <input type="text" id="role" class="form-control" value="{{ ucfirst($user->role) }}" readonly>
                                     @else
                                         {{-- Superadmin mengedit user lain --}}
-                                        <select name="role" class="form-control" required>
+                                        <select name="role" id="role" class="form-control" required>
                                             <option value="">-- Pilih Role --</option>
                                             <option value="admin" {{ old('role', $user->role) == 'admin' ? 'selected' : '' }}>Admin</option>
                                             <option value="user" {{ old('role', $user->role) == 'user' ? 'selected' : '' }}>User</option>
@@ -90,7 +90,7 @@
                                 @else
                                     {{-- Bukan superadmin, tidak bisa mengubah role --}}
                                     <input type="hidden" name="role" value="{{ $user->role }}">
-                                    <input type="text" class="form-control" value="{{ ucfirst($user->role) }}" readonly>
+                                    <input type="text" id="role" class="form-control" value="{{ ucfirst($user->role) }}" readonly>
                                 @endif
                         </div>
                         <div class="mb-3 col-md-6">

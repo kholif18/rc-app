@@ -308,8 +308,7 @@
                     @foreach ($order->internalNotes()->latest()->get() as $note)
                         <div class="d-flex mb-2">
                             <div class="flex-shrink-0">
-                                <img src="{{ asset('storage/avatars/' . ($note->user->avatar ?? 'avatar.png')) }}"
-                                    alt="{{ $note->user->name ?? 'User' }}"
+                                <img src="{{ isset($note->user->avatar) && $note->user->avatar !== 'avatar.png' ? asset('storage/avatars/' . $note->user->avatar) : asset('avatar.png') }}" alt="{{ $note->user->name }}"
                                 class="rounded-circle"
                                 width="40"
                                 height="40">

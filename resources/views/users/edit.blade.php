@@ -26,7 +26,7 @@
             @method('PUT')
                 <div class="card-body">
                     <div class="d-flex align-items-start align-items-sm-center gap-4">
-                    <img id="uploadedAvatar" src="{{ $user->avatar ? asset('storage/avatars/' . $user->avatar) : asset('avatar.png') }}"
+                    <img id="uploadedAvatar" src="{{ $user->avatar && $user->avatar !== 'avatar.png' ? asset('storage/avatars/' . $user->avatar) : asset('avatar.png') }}"
                         alt="user-avatar"
                         class="d-block rounded"
                         height="100"

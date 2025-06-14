@@ -135,17 +135,26 @@
                             <td>
                                 <div class="fw-bold">{{ $order->deadline->format('d M Y') }}</div>
                                 @php
-                                    $daysLeft = now()->diffInDays($order->deadline, false); // false agar bisa bernilai negatif jika sudah lewat
-                                    $daysLeftRounded = round($daysLeft); // Membulatkan nilai hari
-                                    if ($daysLeftRounded < 0) {
-                                        $color = 'text-danger'; // lewat deadline
-                                        $label = 'Terlambat ' . abs($daysLeftRounded) . ' hari';
-                                    } elseif ($daysLeftRounded <= 2) {
-                                        $color = 'text-warning'; // mendekati deadline
-                                        $label = 'Sisa ' . $daysLeftRounded . ' hari';
+                                    $statusFinal = ['Selesai', 'Diambil', 'Dibatalkan'];
+
+                                    if (in_array($order->status, $statusFinal)) {
+                                        // Jika status termasuk status akhir
+                                        $color = 'text-muted';
+                                        $label = $order->status;
                                     } else {
-                                        $color = 'text-success'; // aman
-                                        $label = 'Sisa ' . $daysLeftRounded . ' hari';
+                                        // Hitung sisa hari
+                                        $daysLeft = now()->diffInDays($order->deadline, false); // false agar bisa bernilai negatif jika sudah lewat
+                                        $daysLeftRounded = round($daysLeft); // Membulatkan nilai hari
+                                        if ($daysLeftRounded < 0) {
+                                            $color = 'text-danger'; // lewat deadline
+                                            $label = 'Terlambat ' . abs($daysLeftRounded) . ' hari';
+                                        } elseif ($daysLeftRounded <= 2) {
+                                            $color = 'text-warning'; // mendekati deadline
+                                            $label = 'Sisa ' . $daysLeftRounded . ' hari';
+                                        } else {
+                                            $color = 'text-success'; // aman
+                                            $label = 'Sisa ' . $daysLeftRounded . ' hari';
+                                        }
                                     }
                                 @endphp
 

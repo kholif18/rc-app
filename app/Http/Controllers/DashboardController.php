@@ -86,7 +86,7 @@ class DashboardController extends Controller
         $today = Carbon::today();
         $lateOrders = Order::with('customer')
             ->whereDate('deadline', '<=', $today->copy()->addDay()) // H-1 atau lebih
-            ->whereNotIn('status', ['Selesai', 'Diambil']) // opsional, hanya tampilkan yang belum selesai
+            ->whereNotIn('status', ['Selesai', 'Diambil', 'Batal']) // opsional, hanya tampilkan yang belum selesai
             ->orderBy('deadline', 'asc')
             ->take(5)
             ->get();

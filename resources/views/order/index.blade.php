@@ -135,7 +135,7 @@
                             <td>
                                 <div class="fw-bold">{{ $order->deadline->format('d M Y') }}</div>
                                 @php
-                                    $statusFinal = ['Selesai', 'Diambil', 'Dibatalkan'];
+                                    $statusFinal = ['Selesai', 'Diambil', 'Batal'];
 
                                     if (in_array($order->status, $statusFinal)) {
                                         // Jika status termasuk status akhir

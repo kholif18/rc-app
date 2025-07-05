@@ -2,12 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\BahanCetak;
+use Carbon\Carbon;
 use App\Models\Order;
+use App\Models\Setting;
 use App\Models\Customer;
 use App\Models\OrderFile;
+use App\Models\BahanCetak;
 use Illuminate\Http\Request;
+use App\Models\MessageTemplate;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
+use App\Helpers\MessageTemplateHelper;
 use Illuminate\Support\Facades\Storage;
 
 
@@ -89,6 +94,13 @@ class OrderController extends Controller
      */
     public function store(Request $request)
     {
+        $today = Carbon::today()->format('Ymd');
+
+        // Hitung berapa order hari ini
+        $todayOrderCount = Order::whereDate('created_at', Carbon::today())->count() + 1;
+
+        $orderNumber = 'ORD-' . $today . '-' . str_pad($todayOrderCount, 3, '0', STR_PAD_LEFT);
+        
         $services = $request->input('services', []);
 
         $request->validate([
@@ -132,6 +144,7 @@ class OrderController extends Controller
         $request->validate($customRules);
         
         $order = Order::create([
+            'order_number'   => $orderNumber,
             'user_id'        => Auth::id(), // Menyimpan user yang login
             'customer_id'    => $request->customer_id,
             'services'       => $request->services,
@@ -169,19 +182,20 @@ class OrderController extends Controller
      * Display the specified resource.
      */
 
-    public function show($orderId)
+    public function show($orderNumber)
     {
         $order = Order::with([
-            'progress' => function($query) {
+            'progress' => function ($query) {
                 $query->latest();
             },
             'progress.user',
             'user',
             'customer'
-        ])->findOrFail($orderId);
+        ])->where('order_number', $orderNumber)->firstOrFail();
 
         return view('order.show', compact('order'));
     }
+
     /**
      * Show the form for editing the specified resource.
      */
@@ -334,6 +348,41 @@ class OrderController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Order berhasil dibatalkan.');
+    }
+
+    public function sendMessage(Request $request, $orderId)
+    {
+        $order = Order::with('customer')->findOrFail($orderId);
+        $setting = Setting::first();
+
+        $templateName = $request->input('template', 'order_ready');
+        $template = \App\Models\MessageTemplate::where('name', $templateName)->first();
+
+        if (!$template) {
+            return redirect()->back()->with('error', 'Template pesan tidak ditemukan.');
+        }
+
+        $message = MessageTemplateHelper::parseTemplate($template->content, $order);
+        $phone = $order->customer->phone;
+
+        try {
+            $response = Http::timeout(10)
+                ->asForm()
+                ->post($setting->gateway_url . '/api/send', [
+                    'phone'   => $phone,
+                    'message' => $message,
+                    'client'  => $setting->client_name,
+                    'secret'  => $setting->api_token,
+                ]);
+
+            if ($response->successful()) {
+                return redirect()->back()->with('success', 'Pesan berhasil dikirim.');
+            } else {
+                return redirect()->back()->with('error', 'Gagal mengirim pesan: ' . $response->body());
+            }
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal konek ke gateway: ' . $e->getMessage());
+        }
     }
     /**
      * Remove the specified resource from storage.

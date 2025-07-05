@@ -131,7 +131,7 @@
     <script src="{{ asset('template/assets/js/main.js') }}"></script>
 
     <!-- sweat alert -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{{ asset('template/assets/js/sweetalert2.all.min.js') }}"></script>
 
     <!-- Page JS -->
     <script src="{{ asset('template/assets/js/dashboards-analytics.js') }}"></script>

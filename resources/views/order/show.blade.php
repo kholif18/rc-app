@@ -1,7 +1,7 @@
 @extends('partial.master')
 
 @section('title')
-    #{{ $order->id }}
+    #{{ $order->order_number }}
 @endsection
 
 @section('breadcrumb')
@@ -11,7 +11,7 @@
     </li>
     <li class="breadcrumb-item active">
         <a href="{{ url()->current() }}">
-            #{{ $order->id }}
+            #{{ $order->order_number }}
         </a>
     </li>
 @endsection
@@ -62,7 +62,7 @@
             <div class="card">
                 <div class="card-header">
                     <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="card-title mb-0">Order #{{ $order->id }}</h5>
+                        <h5 class="card-title mb-0">Order #{{ $order->order_number }}</h5>
                         @php
                             $statusClass = match($order->status) {
                                 'Menunggu' => 'badge bg-secondary',
@@ -172,7 +172,7 @@
                 </div>
 
                 <h6><i class="fas fa-file-alt me-2"></i>Detail Layanan</h6>
-                <div class="mb-4 p-3 bg-light rounded">
+                <div class="mb-4 p-3 bg-secondary text-white rounded">
                     @if (in_array('Ketik', $order->services))
                         <p class="mb-2"><strong>Jumlah Halaman:</strong> {{ $order->page_count }} halaman</p>
                         <p class="mb-2"><strong>Format:</strong> {{ $order->doc_type }}</p>
@@ -228,6 +228,9 @@
                     </button>
 
                     <div>
+                        <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#sendMessageModal">
+                            <i class="fas fa-paper-plane me-1"></i> Kirim Pesan
+                        </button>
                         <button type="button" class="btn btn-success"
                                 data-bs-toggle="modal" data-bs-target="#statusModal"
                                 @if($order->status === 'Batal' || $order->status === 'Diambil') disabled @endif>
@@ -405,6 +408,38 @@
             </div>
         </div>
     </form>
+
+    <!-- Modal: Kirim Pesan -->
+    <div class="modal fade" id="sendMessageModal" tabindex="-1" aria-labelledby="sendMessageModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="POST" action="{{ route('order.sendMessage', $order->id) }}">
+        @csrf
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title" id="sendMessageModalLabel">Kirim Pesan ke {{ $order->customer->name }}</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+            </div>
+            <div class="modal-body">
+            <div class="mb-3">
+                <label for="template" class="form-label">Pilih Template Pesan</label>
+                <select name="template" id="template" class="form-select" required>
+                @foreach(App\Models\MessageTemplate::all() as $template)
+                    <option value="{{ $template->name }}">{{ $template->title }}</option>
+                @endforeach
+                </select>
+            </div>
+            </div>
+            <div class="modal-footer">
+            <button type="submit" class="btn btn-info">
+                <i class="fas fa-paper-plane me-1"></i> Kirim Pesan
+            </button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+            </div>
+        </div>
+        </form>
+    </div>
+    </div>
+
 @endsection
 
 @push('scripts')

@@ -116,7 +116,7 @@
                     <tbody>
                         @foreach ($orders as $order)
                         <tr class="order-row">
-                            <td>{{ $order->id }}</td>
+                            <td>{{ $order->order_number }}</td>
                             <td>{{ $order->created_at->format('d M Y') }}</td>
                             <td>
                                 <div class="fw-bold">{{ $order->customer->name }}</div>
@@ -192,7 +192,7 @@
                                 <a href="{{ route('order.edit', $order) }}" class="btn btn-sm btn-outline-primary">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <a href="{{ route('order.show', $order) }}" class="btn btn-sm btn-outline-info">
+                                <a href="{{ route('order.show', $order->order_number) }}" class="btn btn-sm btn-outline-info">
                                     <i class="fas fa-eye"></i>
                                 </a>
                             </td>

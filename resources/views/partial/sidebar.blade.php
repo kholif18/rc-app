@@ -25,7 +25,7 @@
             <li class="menu-item  {{ Request::is('/') ? 'active' : '' }}">
                 <a href="{{ url('/') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-home-circle"></i>
-                <div data-i18n="dashboard">Dashboard</div>
+                <div data-i18n="Dashboard">Dashboard</div>
                 </a>
             </li>
 
@@ -43,7 +43,7 @@
             <li class="menu-item  {{ Request::is('debts*') ? 'active' : '' }}">
                 <a href="{{ route('debts.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-wallet"></i>
-                <div data-i18n="Debt">Debts</div>
+                <div data-i18n="Debts">Debts</div>
                 </a>
             </li>
 
@@ -56,6 +56,20 @@
 
             <li class="menu-header small text-uppercase">
                 <span class="menu-header-text">Master Data</span>
+            </li>
+            
+            <li class="menu-item  {{ Request::is('files*') ? 'active' : '' }}">
+                <a href="{{ route('files') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-folder"></i>
+                <div data-i18n="Files">Files</div>
+                </a>
+            </li>
+            
+            <li class="menu-item  {{ Request::is('message-templates*') ? 'active' : '' }}">
+                <a href="{{ route('message-templates.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-mail-send"></i>
+                <div data-i18n="Template Message">Template Message</div>
+                </a>
             </li>
             
             <li class="menu-item  {{ Request::is('customers*') ? 'active' : '' }}">
@@ -98,21 +112,28 @@
             <li class="menu-item  {{ Request::is('users*') ? 'active' : '' }}">
                 <a href="{{ route('users.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-user"></i>
-                <div data-i18n="Basic">User</div>
+                <div data-i18n="User">User</div>
                 </a>
             </li>
 
             <li class="menu-item  {{ Request::is('admin/database*') ? 'active' : '' }}">
                 <a href="{{ route('backup.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-data"></i>
-                <div data-i18n="Basic">Backup</div>
+                <div data-i18n="Backup">Backup</div>
+                </a>
+            </li>
+            
+            <li class="menu-item  {{ Route::is('api.index*') ? 'active' : '' }}">
+                <a href="{{ route('api.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bxs-key"></i>
+                <div data-i18n="Api Setting">Api Setting</div>
                 </a>
             </li>
             
             <li class="menu-item  {{ Request::is('settings*') ? 'active' : '' }}">
                 <a href="{{ route('settings.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bxs-cog"></i>
-                <div data-i18n="Basic">System Settings</div>
+                <div data-i18n="System Settings">System Settings</div>
                 </a>
             </li>
 

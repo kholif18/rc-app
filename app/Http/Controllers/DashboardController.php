@@ -138,6 +138,7 @@ class DashboardController extends Controller
             'printToday', 'printChange'
         ));
     }
+<<<<<<< HEAD
 }
 
 // class DashboardController extends Controller
@@ -307,3 +308,6 @@ class DashboardController extends Controller
 //         }
 //     }
 // }
+=======
+}
+>>>>>>> 1c3f125 (add send file, file manager, dll)

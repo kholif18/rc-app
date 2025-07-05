@@ -20,6 +20,9 @@ return new class extends Migration
             $table->string('address')->nullable();
             $table->string('logo')->nullable();
             $table->string('favicon')->nullable();
+            $table->string('client_name')->nullable();
+            $table->string('api_token')->nullable();
+            $table->string('gateway_url')->nullable();
             $table->timestamps();
         });
     }

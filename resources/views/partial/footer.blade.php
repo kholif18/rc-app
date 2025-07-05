@@ -5,8 +5,12 @@
             <script>
             document.write(new Date().getFullYear());
             </script>
+<<<<<<< HEAD
             <a href="https://ravaa.my.id" target="_blank" class="footer-link fw-bolder">Ravaa Creative.</a>
             All rights reserved.
+=======
+            <a href="https://ravaa.my.id" target="_blank" class="footer-link fw-bolder">Ravaa Creative.</a> All rights reserved.
+>>>>>>> 1c3f125 (add send file, file manager, dll)
         </div>
         <div>
             <span class="footer"><strong>Version</strong> 1.0</span>

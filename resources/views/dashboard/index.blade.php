@@ -87,8 +87,8 @@
                     </thead>
                     <tbody>
                         @forelse ($latestOrders as $order)
-                            <tr class="clickable-row" data-href="{{ route('order.show', $order->id) }}">
-                                <td>{{ $order->id }}</td>
+                            <tr class="clickable-row" data-href="{{ route('order.show', $order->order_number) }}">
+                                <td>{{ $order->order_number }}</td>
                                 <td>{{ $order->customer->name ?? '-' }}</td>
                                 <td>@foreach ($order->services as $svc)
                                         <span class="service-tag service-{{ strtolower($svc) }}">
@@ -158,8 +158,8 @@
                                 $isLate = $deadline->lt($today);
                                 $deadlineDiff = $today->diffInDays($deadline, false); // minus jika sudah lewat
                             @endphp
-                            <tr onclick="window.location='{{ route('order.show', $order->id) }}'" style="cursor:pointer;">
-                                <td class="{{ $isLate ? 'urgent' : '' }}">{{ $order->id }}</td>
+                            <tr onclick="window.location='{{ route('order.show', $order->order_number) }}'" style="cursor:pointer;">
+                                <td class="{{ $isLate ? 'urgent' : '' }}">{{ $order->order_number }}</td>
                                 <td>{{ $order->customer->name }}</td>
                                 <td>@foreach ($order->services as $svc)
                                         <span class="service-tag service-{{ strtolower($svc) }}">

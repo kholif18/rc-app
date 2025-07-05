@@ -13,5 +13,9 @@ class Setting extends Model
         'website', 
         'address', 
         'logo', 
-        'favicon'];
+        'favicon',
+        'client_name',
+        'api_token',
+        'gateway_url',
+    ];
 }

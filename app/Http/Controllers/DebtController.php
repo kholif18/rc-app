@@ -19,23 +19,33 @@ class DebtController extends Controller
         $search = $request->input('search');
         $perPage = 10;
 
+        $latestDebts = DB::table('debts as d1')
+        ->select('d1.customer_id', 'd1.note', 'd1.created_at', 'd1.id')
+        ->whereRaw('d1.created_at = (
+            SELECT MAX(d2.created_at)
+            FROM debts d2
+            WHERE d2.customer_id = d1.customer_id
+        )');
         // Query dengan join dan aggregate
         $query = DB::table('customers')
-            ->join('debts', 'debts.customer_id', '=', 'customers.id')
+            ->leftJoin('debts', 'debts.customer_id', '=', 'customers.id')
             ->leftJoin('payments', 'payments.debt_id', '=', 'debts.id')
+            ->leftJoinSub($latestDebts, 'latest_debt', function ($join) {
+                $join->on('customers.id', '=', 'latest_debt.customer_id');
+            })
             ->select(
                 'customers.id',
                 'customers.name',
                 'customers.phone',
                 'customers.address',
-                DB::raw('MAX(debts.created_at) as last_debt_date'),
-                DB::raw('MAX(debts.note) as last_debt_note'),
-                DB::raw('MAX(debts.id) as last_debt_id'),
                 DB::raw('COALESCE(SUM(debts.amount), 0) as total_debt_amount'),
                 DB::raw('COALESCE(SUM(payments.amount), 0) as total_paid_amount'),
-                DB::raw('(COALESCE(SUM(debts.amount), 0) - COALESCE(SUM(payments.amount), 0)) as total_debt')
+                DB::raw('(COALESCE(SUM(debts.amount), 0) - COALESCE(SUM(payments.amount), 0)) as total_debt'),
+                'latest_debt.created_at as last_debt_date',
+                'latest_debt.note as last_debt_note',
+                'latest_debt.id as last_debt_id'
             )
-            ->groupBy('customers.id', 'customers.name', 'customers.phone', 'customers.address');
+            ->groupBy('customers.id', 'customers.name', 'customers.phone', 'customers.address', 'latest_debt.created_at', 'latest_debt.note', 'latest_debt.id');
 
         // Filter search jika ada
         if ($search) {

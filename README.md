@@ -1,9 +1,16 @@
 # RC App
 
-**Versi:** 1.1.0\
 **Aplikasi Manajemen Order & Pencatatan Hutang Pelanggan**
 
 RC App adalah aplikasi berbasis Laravel yang dirancang untuk mengelola order layanan cetak, komunikasi WhatsApp otomatis, pengaturan kecepatan layanan, pencatatan file, dan manajemen hutang pelanggan dengan tampilan antarmuka modern dan responsif.
+
+**Berikut Screenshoot dari beberapa tampilan aplikasi RC App**
+## Tampilan Aplikasi
+
+![Dashboard](public/template/assets/img/dashboard.jpg)
+![Add Order](public/template/assets/img/add-order.jpg)
+![Detail Order](public/template/assets/img/Detail-order.jpg)
+![Manajemen Order](public/template/assets/img/Manajemen-order.jpg)
 
 ---
 

@@ -19,7 +19,7 @@
 @section('content')
 <div class="card">
     <div class="mb-2">
-        <h2>Edit Order</h2>
+        <h5 class="card-header">Edit Order</h5>
     </div>
 
     <form id="orderForm" action="{{ route('order.update', $order->id) }}" method="POST" enctype="multipart/form-data">

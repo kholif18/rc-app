@@ -134,5 +134,5 @@ return [
     //     'Excel' => Maatwebsite\Excel\Facades\Excel::class,
     // ],
 
-    'version' => '1.1.0',
+    'version' => env('APP_VERSION', '1.0.0'),
 ];

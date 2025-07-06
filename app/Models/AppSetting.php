@@ -10,9 +10,9 @@ class AppSetting extends Model
 
     public $timestamps = false;
 
-    public static function get($key, $default = null)
+    public static function get($key)
     {
-        return static::where('key', $key)->value('value') ?? $default;
+        return optional(static::where('key', $key)->first())->value;
     }
 
     public static function set($key, $value)

@@ -191,5 +191,28 @@
                 });
         });
 
+        document.getElementById('installUpdateBtn').addEventListener('click', function () {
+            const btn = this;
+            const spinner = btn.querySelector('.spinner-border');
+            
+            btn.disabled = true;
+            spinner.classList.remove('d-none');
+
+            fetch('{{ route('update.install') }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                spinner.classList.add('d-none');
+                btn.disabled = false;
+                alert(data.message);
+                if (data.success) {
+                    location.reload();
+                }
+            });
+        });
     </script>
 @endsection

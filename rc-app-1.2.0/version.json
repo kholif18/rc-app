@@ -1,0 +1,12 @@
+{
+  "version": "1.2.0",
+  "url": "https://github.com/kholif18/rc-app/archive/refs/tags/v1.2.0.zip",
+  "changelog": [
+    "✨ Penambahan fitur sistem pembaruan otomatis.",
+    "📦 Penambahan auto-update via tombol di panel admin.",
+    "🧾 Penambahan template pesan: order_progress, order_cancelled.",
+    "🛠 Peningkatan performa sistem upload file dan validasi frontend.",
+    "🔒 Perbaikan validasi dan pembatasan ukuran file (max 10MB).",
+    "🐞 Perbaikan bug kecil di halaman detail order dan form edit."
+  ]
+}

@@ -168,9 +168,11 @@
                             <div class="alert alert-warning mb-3">
                                 ${data.message}
                             </div>
-                            <button id="installUpdateBtn" class="btn btn-success">
+                            <button id="installUpdateBtn" class="btn btn-success d-flex align-items-center">
+                                <span class="spinner-border spinner-border-sm me-2 d-none" id="installSpinner" role="status" aria-hidden="true"></span>
                                 Install Update
                             </button>
+                            <div id="installStatus" class="mt-3 text-muted d-none">Mempersiapkan instalasi...</div>
                         `;
                     } else {
                         result.innerHTML = `
@@ -191,28 +193,47 @@
                 });
         });
 
-        document.getElementById('installUpdateBtn').addEventListener('click', function () {
-            const btn = this;
-            const spinner = btn.querySelector('.spinner-border');
-            
-            btn.disabled = true;
-            spinner.classList.remove('d-none');
+        document.addEventListener('click', function (e) {
+            if (e.target && e.target.id === 'installUpdateBtn') {
+                const btn = e.target;
+                const spinner = document.getElementById('installSpinner');
+                const status = document.getElementById('installStatus');
 
-            fetch('{{ route('update.install') }}', {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                }
-            })
-            .then(res => res.json())
-            .then(data => {
-                spinner.classList.add('d-none');
-                btn.disabled = false;
-                alert(data.message);
-                if (data.success) {
-                    location.reload();
-                }
-            });
+                btn.disabled = true;
+                spinner.classList.remove('d-none');
+                status.classList.remove('d-none');
+                status.textContent = 'Sedang menginstal pembaruan, mohon tunggu...';
+
+                fetch('{{ route('update.install') }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    spinner.classList.add('d-none');
+                    status.textContent = data.message;
+
+                    if (data.success) {
+                        status.classList.add('text-success');
+                        setTimeout(() => {
+                            location.reload();
+                        }, 3000);
+                    } else {
+                        status.classList.add('text-danger');
+                        btn.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    spinner.classList.add('d-none');
+                    status.classList.remove('d-none');
+                    status.classList.add('text-danger');
+                    status.textContent = 'Terjadi kesalahan saat instalasi.';
+                    btn.disabled = false;
+                    console.error(error);
+                });
+            }
         });
     </script>
 @endsection

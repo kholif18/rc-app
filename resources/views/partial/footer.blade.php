@@ -9,7 +9,7 @@
             All rights reserved.
         </div>
         <div>
-            <span class="footer"><strong>Version</strong> {{ config('app.version') }}</span>
+            <span class="footer"><strong>Version</strong> {{ $app_version }}</span>
         </div>
     </div>
 </footer>

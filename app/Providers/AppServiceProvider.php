@@ -3,9 +3,10 @@
 namespace App\Providers;
 
 use App\Models\Setting;
-use Illuminate\Support\Facades\Schema;
+use App\Models\AppSetting;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -30,5 +31,7 @@ class AppServiceProvider extends ServiceProvider
 
             view()->share('setting', $settings);
         }
+
+        view()->share('app_version', AppSetting::get('app_version', config('app.version')));
     }
 }

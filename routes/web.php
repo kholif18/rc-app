@@ -8,6 +8,7 @@ use App\Http\Controllers\FilesController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\BackupController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\UpdateController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\CustomerController;
@@ -75,6 +76,9 @@ Route::middleware('auth')->group(function () {
             Route::post('/import', [BackupController::class, 'import'])->name('import');
         });
     });
+
+    Route::get('/check-update', [UpdateController::class, 'check'])->name('update.check');
+    Route::post('/install-update', [UpdateController::class, 'install'])->name('update.install');
 });
 
 // Form upload file untuk client

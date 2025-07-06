@@ -1,7 +1,7 @@
 @extends('partial.master')
 
 @section('title')
-    Buat Pesanan
+    Edit Pesanan
 @endsection
 
 @section('breadcrumb')
@@ -11,7 +11,7 @@
     </li>
     <li class="breadcrumb-item active">
         <a href="{{ url()->current() }}">
-            Buat Pesanan
+            Edit Pesanan
         </a>
     </li>
 @endsection
@@ -19,7 +19,7 @@
 @section('content')
 <div class="card">
     <div class="mb-2">
-        <h2>Tambah Order Baru</h2>
+        <h2>Edit Order</h2>
     </div>
 
     <form id="orderForm" action="{{ route('order.update', $order->id) }}" method="POST" enctype="multipart/form-data">
@@ -47,7 +47,7 @@
                     <div id="fileUploadArea" class="file-upload-area">
                         <i class="bx bx-cloud-upload fa-3x mb-3 text-muted"></i>
                         <h5>Seret file ke sini atau klik untuk memilih</h5>
-                        <p class="text-muted">Format file: DOC, DOCX, PDF, JPG, PNG, PSD, AI (Maks. 10MB)</p>
+                        <p id="file-info" class="text-muted">Format file: DOC, DOCX, PDF, JPG, PNG, PSD, AI (Maks. 10MB)</p>
                         <input type="file" id="fileInput" name="order_files[]" multiple style="display: none;">
                     </div>
                     <div id="filePreview" class="file-preview">
@@ -221,6 +221,18 @@
         </div>
     </form>
 </div>
+
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999">
+    <div id="uploadToast" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body" id="toastMessage">
+                <!-- Pesan akan diisi lewat JS -->
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @push('scripts')
@@ -344,15 +356,26 @@
             }
         });
 
-
         //Upload File
         function initFileUpload() {
             const fileUploadArea = document.getElementById('fileUploadArea');
             const fileInput = document.getElementById('fileInput');
             const filePreview = document.getElementById('filePreview');
+            const fileInfo = document.getElementById('file-info');
             const cancelUploadBtn = document.getElementById('cancelUploadBtn');
 
             let selectedFiles = [];
+
+            const validTypes = [
+                'application/pdf',
+                'application/msword',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'image/jpeg',
+                'image/jpg',
+                'image/png',
+                'image/vnd.adobe.photoshop',
+                'application/postscript'
+            ];
 
             function formatFileSize(bytes) {
                 if (bytes === 0) return '0 Bytes';
@@ -367,6 +390,9 @@
                 if (selectedFiles.length === 0) {
                     filePreview.innerHTML = '<div class="text-muted">Belum ada file dipilih</div>';
                     cancelUploadBtn.style.display = 'none';
+                    if (fileInfo) {
+                        fileInfo.innerHTML = 'Format file: DOC, DOCX, PDF, JPG, PNG, PSD, AI (Maks. 10MB)';
+                    }
                     return;
                 }
 
@@ -397,6 +423,7 @@
                 });
 
                 updateFileInput();
+                updateFileInfo();
                 cancelUploadBtn.style.display = 'inline-block';
             }
 
@@ -406,19 +433,108 @@
                 fileInput.files = dataTransfer.files;
             }
 
+            function updateFileInfo() {
+                if (!fileInfo) return;
+                if (selectedFiles.length === 1) {
+                    const file = selectedFiles[0];
+                    fileInfo.innerHTML = `<p>File terpilih: <strong>${file.name}</strong> (${formatFileSize(file.size)})</p>`;
+                } else {
+                    const totalSize = selectedFiles.reduce((acc, file) => acc + file.size, 0);
+                    fileInfo.innerHTML = `<p>${selectedFiles.length} file terpilih (Total: ${formatFileSize(totalSize)})</p>`;
+                }
+            }
+
             function removeFile(index) {
                 selectedFiles.splice(index, 1);
                 updateFilePreview();
             }
 
+            function handleFiles(files) {
+                const newFiles = Array.from(files);
+                let hasInvalid = false;
+
+                const allowedExtensions = ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png', 'psd', 'ai'];
+                const validFiles = newFiles.filter(file => {
+                    const extension = file.name.split('.').pop().toLowerCase();
+                    if (!validTypes.includes(file.type) && !allowedExtensions.includes(extension)) {
+                        showToast(`File "${file.name}" tidak didukung.`);
+                        hasInvalid = true;
+                        return false;
+                    }
+
+                    if (file.size > 10 * 1024 * 1024) {
+                        showToast(`Ukuran "${file.name}" melebihi 10 MB.`);
+                        hasInvalid = true;
+                        return false;
+                    }
+
+                    return true;
+                });
+
+                if (validFiles.length > 0) {
+                    selectedFiles.push(...validFiles);
+                    updateFilePreview(); // <- ini juga update input & info
+                }
+
+                // reset agar tidak mengandung file invalid
+                fileInput.value = '';
+            }
+
             if (fileUploadArea && fileInput && filePreview) {
+                // Klik untuk pilih file
                 fileUploadArea.addEventListener('click', () => fileInput.click());
 
-                fileInput.addEventListener('change', () => {
-                    Array.from(fileInput.files).forEach(file => selectedFiles.push(file));
-                    updateFilePreview();
+                // Drag & drop
+                fileUploadArea.addEventListener('dragover', e => {
+                    e.preventDefault();
+                    fileUploadArea.classList.add('active');
                 });
+
+                fileUploadArea.addEventListener('dragleave', () => {
+                    fileUploadArea.classList.remove('active');
+                });
+
+                fileUploadArea.addEventListener('drop', e => {
+                    e.preventDefault();
+                    fileUploadArea.classList.remove('active');
+                    if (e.dataTransfer.files.length) {
+                        fileInput.files = e.dataTransfer.files;
+                        handleFiles(e.dataTransfer.files);
+                    }
+                });
+
+                // File input change
+                fileInput.addEventListener('change', () => {
+                    handleFiles(fileInput.files);
+                });
+
+                // Cancel upload button
+                if (cancelUploadBtn) {
+                    cancelUploadBtn.addEventListener('click', () => {
+                        selectedFiles = [];
+                        fileInput.value = '';
+                        updateFilePreview();
+                    });
+                }
             }
+            document.getElementById('orderForm').addEventListener('submit', function (e) {
+                const totalSize = selectedFiles.reduce((acc, file) => acc + file.size, 0);
+                const maxTotalSize = 10 * 1024 * 1024; // max total size 10MB
+
+                if (totalSize > maxTotalSize) {
+                    e.preventDefault();
+                    showToast('Total ukuran file melebihi 50MB.');
+                }
+            });
+        }
+
+        function showToast(message) {
+            const toastMessage = document.getElementById('toastMessage');
+            toastMessage.textContent = message;
+
+            const toastElement = document.getElementById('uploadToast');
+            const toast = new bootstrap.Toast(toastElement);
+            toast.show();
         }
 
         //Tombol Batal
@@ -449,7 +565,5 @@
             initFileUpload();
             initCancelButton();
         });
-
-
     </script>
 @endpush

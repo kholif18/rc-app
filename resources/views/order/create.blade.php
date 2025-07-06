@@ -65,15 +65,6 @@
             <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#addCustomerModal">Add Customer</button>
         </div>
     </div>
-    @if ($errors->any())
-    <div class="alert alert-danger">
-        <ul>
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    </div>
-@endif
 
     <form id="orderForm" action="{{ route('order.store') }}" method="POST" enctype="multipart/form-data">
     @csrf
@@ -113,7 +104,7 @@
                     <div id="fileUploadArea" class="file-upload-area">
                         <i class="bx bx-cloud-upload fa-3x mb-3 text-muted"></i>
                         <h5>Seret file ke sini atau klik untuk memilih</h5>
-                        <p class="text-muted">Format file: DOC, DOCX, PDF, JPG, PNG, PSD, AI (Maks. 10MB)</p>
+                        <p id="file-info" class="text-muted">Format file: DOC, DOCX, PDF, JPG, PNG, PSD, AI (Maks. 10MB)</p>
                         <input type="file" id="fileInput" name="order_files[]" multiple style="display: none;">
                     </div>
                     <div id="filePreview" class="file-preview">
@@ -257,6 +248,15 @@
     </form>
 </div>
 
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="uploadToast" class="toast align-items-center text-white bg-danger border-0" role="alert">
+        <div class="d-flex">
+            <div class="toast-body" id="toastMessage">Error</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+
     <!-- Modal Tambah Bahan -->
     @include('order.modal-tambah')
 @endsection
@@ -338,113 +338,183 @@
             }
         });
 
-        // File Upload dengan tombol close dan cancel
         const fileUploadArea = document.getElementById('fileUploadArea');
         const fileInput = document.getElementById('fileInput');
         const filePreview = document.getElementById('filePreview');
+        const fileInfo = document.getElementById('file-info');
         const cancelUploadBtn = document.getElementById('cancelUploadBtn');
 
-        // Array untuk menyimpan file yang dipilih user
         let selectedFiles = [];
 
-        // Ketika area diklik, buka file picker
+        const validExtensions = ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png', 'psd', 'ai'];
+        const maxFileSize = 10 * 1024 * 1024; // 10MB
+
+        // Event klik upload area
         fileUploadArea.addEventListener('click', () => fileInput.click());
 
-        // Ketika file dipilih
-        fileInput.addEventListener('change', function() {
-            if (this.files.length > 0) {
-                // Tambahkan file baru ke array
-                Array.from(this.files).forEach(file => {
-                    selectedFiles.push(file);
-                });
+        // Drag and Drop
+        fileUploadArea.addEventListener('dragover', e => {
+            e.preventDefault();
+            fileUploadArea.classList.add('active');
+        });
+        fileUploadArea.addEventListener('dragleave', () => {
+            fileUploadArea.classList.remove('active');
+        });
+        fileUploadArea.addEventListener('drop', e => {
+            e.preventDefault();
+            fileUploadArea.classList.remove('active');
 
-                // Update preview dan input
-                updateFilePreview();
-                
-                // Tampilkan tombol cancel
-                cancelUploadBtn.style.display = 'inline-block';
+            if (e.dataTransfer.files.length) {
+                handleFiles(e.dataTransfer.files);
             }
         });
 
-        // Format ukuran file
-        function formatFileSize(bytes) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        // Event file input
+        fileInput.addEventListener('change', function () {
+            if (this.files.length > 0) {
+                handleFiles(this.files);
+            }
+        });
+
+        // Handle file validasi
+        function handleFiles(fileList) {
+            const newFiles = Array.from(fileList);
+            let hasValid = false;
+
+            newFiles.forEach(file => {
+                const ext = file.name.split('.').pop().toLowerCase();
+
+                if (!validExtensions.includes(ext)) {
+                    showToast(`File "${file.name}" tidak didukung.`);
+                    return;
+                }
+
+                if (file.size > maxFileSize) {
+                    showToast(`Ukuran file "${file.name}" melebihi 10MB.`);
+                    return;
+                }
+
+                selectedFiles.push(file);
+                hasValid = true;
+            });
+
+            if (hasValid) {
+                updateFilePreview();
+                updateFileInput();
+                updateFileInfo();
+                cancelUploadBtn.style.display = 'inline-block';
+            }
+
+            fileInput.value = '';
         }
 
-        // Tampilkan preview file
+        // Update preview
         function updateFilePreview() {
             filePreview.innerHTML = '';
 
             if (selectedFiles.length === 0) {
                 filePreview.innerHTML = '<div class="text-muted">Belum ada file dipilih</div>';
                 cancelUploadBtn.style.display = 'none';
+                updateFileInfo();
                 return;
             }
 
             selectedFiles.forEach((file, index) => {
-                const fileItem = document.createElement('div');
-                fileItem.className = 'file-item d-flex align-items-center mb-2';
+                const item = document.createElement('div');
+                item.className = 'file-item d-flex align-items-center mb-2';
 
-                // Icon file
-                const fileIcon = document.createElement('i');
-                if (file.type.includes('image')) {
-                    fileIcon.className = 'bx bx-image me-2';
-                } else if (file.type.includes('pdf')) {
-                    fileIcon.className = 'bx bxs-file-pdf me-2 text-danger';
-                } else if (file.type.includes('word') || file.name.match(/\.(doc|docx)$/i)) {
-                    fileIcon.className = 'fas fa-file-word me-2 text-primary';
-                } else {
-                    fileIcon.className = 'bx bx-file me-2';
-                }
+                const icon = document.createElement('i');
+                if (file.type.includes('image')) icon.className = 'bx bx-image me-2';
+                else if (file.type.includes('pdf')) icon.className = 'bx bxs-file-pdf me-2 text-danger';
+                else if (file.type.includes('word') || file.name.match(/\.(doc|docx)$/i)) icon.className = 'fas fa-file-word me-2 text-primary';
+                else icon.className = 'bx bx-file me-2';
 
-                // Nama file
-                const fileName = document.createElement('span');
-                fileName.textContent = file.name;
+                const name = document.createElement('span');
+                name.textContent = file.name;
 
-                // Ukuran file
-                const fileSize = document.createElement('small');
-                fileSize.className = 'text-muted ms-2';
-                fileSize.textContent = formatFileSize(file.size);
+                const size = document.createElement('small');
+                size.className = 'text-muted ms-2';
+                size.textContent = formatFileSize(file.size);
 
-                // Tombol hapus file
                 const closeBtn = document.createElement('button');
                 closeBtn.type = 'button';
                 closeBtn.className = 'btn btn-sm btn-link text-danger ms-2';
                 closeBtn.innerHTML = '<i class="bx bx-x"></i>';
-                closeBtn.title = 'Hapus file';
-                closeBtn.onclick = () => removeFile(index);
+                closeBtn.addEventListener('click', () => removeFile(index));
 
-                // Susun item
-                fileItem.appendChild(fileIcon);
-                fileItem.appendChild(fileName);
-                fileItem.appendChild(fileSize);
-                fileItem.appendChild(closeBtn);
-
-                filePreview.appendChild(fileItem);
+                item.append(icon, name, size, closeBtn);
+                filePreview.appendChild(item);
             });
-
-            // Update input file
-            updateFileInput();
         }
 
-        // Update input file agar hanya file di selectedFiles yang dikirim
+        // Update input file
         function updateFileInput() {
-            const dataTransfer = new DataTransfer();
-            selectedFiles.forEach(file => {
-                dataTransfer.items.add(file);
-            });
-            fileInput.files = dataTransfer.files;
+            const dt = new DataTransfer();
+            selectedFiles.forEach(file => dt.items.add(file));
+            fileInput.files = dt.files;
         }
 
-        // Hapus file dari list
+        // Update info total file
+        function updateFileInfo() {
+            if (selectedFiles.length === 0) {
+                fileInfo.innerHTML = 'Format file: DOC, DOCX, PDF, JPG, PNG, PSD, AI (Maks. 10MB)';
+            } else if (selectedFiles.length === 1) {
+                const file = selectedFiles[0];
+                fileInfo.innerHTML = `<p>File terpilih: <strong>${file.name}</strong> (${formatFileSize(file.size)})</p>`;
+            } else {
+                const totalSize = selectedFiles.reduce((acc, file) => acc + file.size, 0);
+                fileInfo.innerHTML = `<p>${selectedFiles.length} file terpilih (Total: ${formatFileSize(totalSize)})</p>`;
+            }
+        }
+
+        // Format ukuran
+        function formatFileSize(bytes) {
+            const units = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(1024));
+            return (bytes / Math.pow(1024, i)).toFixed(1) + ' ' + units[i];
+        }
+
+        // Hapus file
         function removeFile(index) {
             selectedFiles.splice(index, 1);
-            updateFilePreview(); // otomatis update input juga
+            updateFilePreview();
+            updateFileInput();
+            updateFileInfo();
         }
+
+        // Cancel semua file
+        if (cancelUploadBtn) {
+            cancelUploadBtn.addEventListener('click', () => {
+                selectedFiles = [];
+                fileInput.value = '';
+                updateFilePreview();
+                updateFileInfo();
+            });
+        }
+
+        // Toast Error
+        function showToast(message) {
+            const toastMessage = document.getElementById('toastMessage');
+            toastMessage.textContent = message;
+
+            const toastElement = document.getElementById('uploadToast');
+            const toast = new bootstrap.Toast(toastElement);
+            toast.show();
+        }
+
+        document.getElementById('orderForm').addEventListener('submit', function (e) {
+            const tempInput = document.createElement('input');
+            tempInput.type = 'file';
+            tempInput.multiple = true;
+            tempInput.style.display = 'none';
+            tempInput.name = 'order_files[]';
+
+            const dt = new DataTransfer();
+            selectedFiles.forEach(file => dt.items.add(file));
+            tempInput.files = dt.files;
+
+            this.appendChild(tempInput); // tambahkan input ke form sebelum submit
+        });
 
         // tombol batal
         document.getElementById('btn-batal').addEventListener('click', function (e) {

@@ -53,7 +53,7 @@
             </div>
         @endif
     </div>
-    <div class="card">
+    <div class="card mb-4">
         <h5 class="card-header">Settings</h5>
         <div class="card-body">
             <form action="{{ route('settings.update') }}" method="POST" enctype="multipart/form-data">
@@ -125,6 +125,18 @@
         </div>
     </div>
 
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Update Check</h5>
+            <button id="checkUpdateBtn" class="btn btn-info d-flex align-items-center">
+                <span class="spinner-border spinner-border-sm me-2 d-none" id="checkSpinner" role="status" aria-hidden="true"></span>
+                Check Update
+            </button>
+        </div>
+        <div class="card-body d-none" id="updateResult"></div>
+    </div>
+
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const toastElements = document.querySelectorAll('.toast');
@@ -133,5 +145,51 @@
                 toast.show();
             });
         });
+
+        document.getElementById('checkUpdateBtn').addEventListener('click', function () {
+            const btn = this;
+            const spinner = document.getElementById('checkSpinner');
+            const result = document.getElementById('updateResult');
+
+            // Reset tampilan
+            result.classList.add('d-none');
+            result.innerHTML = '';
+            spinner.classList.remove('d-none');
+            btn.disabled = true;
+
+            fetch('{{ route('update.check') }}')
+                .then(res => res.json())
+                .then(data => {
+                    // Tampilkan hasil di card-body
+                    result.classList.remove('d-none');
+
+                    if (data.update_available) {
+                        result.innerHTML = `
+                            <div class="alert alert-warning mb-3">
+                                ${data.message}
+                            </div>
+                            <button id="installUpdateBtn" class="btn btn-success">
+                                Install Update
+                            </button>
+                        `;
+                    } else {
+                        result.innerHTML = `
+                            <div class="alert alert-success">
+                                ${data.message}
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    result.classList.remove('d-none');
+                    result.innerHTML = `<div class="alert alert-danger">Gagal memeriksa pembaruan. Silakan coba lagi.</div>`;
+                    console.error(error);
+                })
+                .finally(() => {
+                    spinner.classList.add('d-none');
+                    btn.disabled = false;
+                });
+        });
+
     </script>
 @endsection

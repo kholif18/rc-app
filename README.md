@@ -1,61 +1,121 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# RC App
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+**Versi:** 1.1.0\
+**Aplikasi Manajemen Order & Pencatatan Hutang Pelanggan**
 
-## About Laravel
+RC App adalah aplikasi berbasis Laravel yang dirancang untuk mengelola order layanan cetak, komunikasi WhatsApp otomatis, pengaturan kecepatan layanan, pencatatan file, dan manajemen hutang pelanggan dengan tampilan antarmuka modern dan responsif.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## ✨ Fitur Utama
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- ✅ Manajemen pelanggan dan order cetak (Desain, Print, dll.)
+- 📁 Upload & manajemen file per order
+- 💬 Template pesan WhatsApp otomatis (order siap, proses, terlambat, batal)
+- 📦 Sistem pembaruan aplikasi (manual & auto update)
+- 📊 Dashboard & histori lengkap
+- 🔐 Hak akses pengguna (Spatie Laravel Permission)
+- ⚙️ Panel pengaturan aplikasi
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## 📦 Instalasi
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+```bash
+git clone https://github.com/kholif18/rc-app.git
+cd rc-app
+cp .env.example .env
+composer install
+php artisan key:generate
+php artisan migrate --seed
+npm install && npm run build
+php artisan serve
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+**Catatan:**
 
-## Laravel Sponsors
+- Ubah konfigurasi `.env` sesuai kebutuhan, termasuk `DB_`, `APP_NAME`, `APP_URL`, dan `UPLOAD_MAX_FILESIZE`
+- File upload dibatasi maksimal 10MB (atur di `php.ini` dan `.env` jika perlu)
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+---
 
-### Premium Partners
+## 🧪 Fitur Auto Update
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+RC App mendukung sistem pembaruan otomatis via tombol "Cek Pembaruan" di admin panel.\
+Untuk menggunakan fitur ini:
 
-## Contributing
+1. Set `update_url` di tabel `app_settings` ke URL file zip update (misal dari GitHub Releases).
+2. Jalankan fitur update di antarmuka admin.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+---
 
-## Code of Conduct
+## 🛠 Pengembangan
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Struktur Utama
 
-## Security Vulnerabilities
+| Folder/File             | Keterangan                                                |
+| ----------------------- | --------------------------------------------------------- |
+| `app/Http/Controllers/` | Logika aplikasi (OrderController, UpdateController, dll.) |
+| `resources/views/`      | Blade template                                            |
+| `public/uploads/`       | Folder file yang diupload                                 |
+| `database/seeders/`     | Data awal seperti pengaturan, template pesan              |
+| `routes/web.php`        | Daftar route aplikasi                                     |
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Seeder Penting
 
-## License
+```bash
+php artisan db:seed --class=AppSettingSeeder
+php artisan db:seed --class=MessageTemplateSeeder
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+---
+
+## 📤 Format Template Pesan
+
+Aplikasi menggunakan template dinamis untuk WhatsApp:
+
+- `order_ready`: Pesanan siap diambil
+- `order_progress`: Pesanan sedang diproses
+- `order_late`: Pesanan melewati tenggat waktu
+- `order_cancelled`: Pesanan dibatalkan
+
+Contoh isi:
+
+```plaintext
+Halo [name], pesanan #[order_number] Anda dengan layanan [services] telah selesai dan siap diambil. Silakan ambil sebelum [deadline]. Terima kasih telah menggunakan layanan kami!
+```
+
+---
+
+## 🔒 Keamanan & Konfigurasi
+
+- Gunakan HTTPS jika aplikasi dipublikasikan
+- Validasi file upload melalui frontend + backend
+- Batasi ukuran file melalui `php.ini`, `.env`, dan JavaScript
+
+---
+
+## 💻 Kontribusi
+
+Pull request dan issue sangat diterima! Silakan fork proyek ini dan kirim kontribusimu.
+
+---
+
+## 📃 Lisensi
+
+[MIT License](LICENSE)
+
+---
+
+## ✉️ Kontak
+
+Untuk pertanyaan atau dukungan, hubungi\
+📧 [**ravaa.net@gmail.com**](mailto\:ravaa.net@gmail.com)\
+🌐 [ravaa.my.id](https://ravaa.my.id)
+
+---
+
+## 🔖 Repositori
+
+GitHub: [https://github.com/kholif18/rc-app](https://github.com/kholif18/rc-app)
+

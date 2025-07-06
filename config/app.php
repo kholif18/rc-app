@@ -133,4 +133,6 @@ return [
     //     'PDF' => Barryvdh\DomPDF\Facade\Pdf::class, 
     //     'Excel' => Maatwebsite\Excel\Facades\Excel::class,
     // ],
+
+    'version' => '1.1.0',
 ];

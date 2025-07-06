@@ -28,7 +28,6 @@ class UpdateController extends Controller
                 // Simpan update_url dan app_version jika ada update
                 if ($updateAvailable) {
                     AppSetting::set('update_url', $data['url']);
-                    // AppSetting::set('app_version', $latestVersion);
                 }
 
                 return response()->json([

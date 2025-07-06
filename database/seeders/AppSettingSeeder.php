@@ -15,6 +15,6 @@ class AppSettingSeeder extends Seeder
     {
         AppSetting::set('app_name', 'RC App');
         AppSetting::set('app_version', '1.1.0');
-        AppSetting::set('update_url', 'https://rc-app.example.com/updates/latest.zip'); // bisa null kalau tidak pakai URL
+        AppSetting::set('update_url', null); 
     }
 }

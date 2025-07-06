@@ -391,7 +391,7 @@
                     filePreview.innerHTML = '<div class="text-muted">Belum ada file dipilih</div>';
                     cancelUploadBtn.style.display = 'none';
                     if (fileInfo) {
-                        fileInfo.innerHTML = 'Format file: DOC, DOCX, PDF, JPG, PNG, PSD, AI (Maks. 10MB)';
+                        fileInfo.innerHTML = 'Format file: DOC, DOCX, PDF, JPG, PNG, PSD, AI (Maks. 50MB)';
                     }
                     return;
                 }
@@ -462,8 +462,8 @@
                         return false;
                     }
 
-                    if (file.size > 10 * 1024 * 1024) {
-                        showToast(`Ukuran "${file.name}" melebihi 10 MB.`);
+                    if (file.size > 50 * 1024 * 1024) {
+                        showToast(`Ukuran "${file.name}" melebihi 50 MB.`);
                         hasInvalid = true;
                         return false;
                     }
@@ -519,7 +519,7 @@
             }
             document.getElementById('orderForm').addEventListener('submit', function (e) {
                 const totalSize = selectedFiles.reduce((acc, file) => acc + file.size, 0);
-                const maxTotalSize = 50 * 1024 * 1024; // max total size 10MB
+                const maxTotalSize = 50 * 1024 * 1024; // max total size 50MB
 
                 if (totalSize > maxTotalSize) {
                     e.preventDefault();

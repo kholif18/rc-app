@@ -347,7 +347,7 @@
         let selectedFiles = [];
 
         const validExtensions = ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png', 'psd', 'ai'];
-        const maxFileSize = 50 * 1024 * 1024; // 10MB
+        const maxFileSize = 50 * 1024 * 1024; // 50MB
 
         // Event klik upload area
         fileUploadArea.addEventListener('click', () => fileInput.click());
@@ -457,7 +457,7 @@
         // Update info total file
         function updateFileInfo() {
             if (selectedFiles.length === 0) {
-                fileInfo.innerHTML = 'Format file: DOC, DOCX, PDF, JPG, PNG, PSD, AI (Maks. 10MB)';
+                fileInfo.innerHTML = 'Format file: DOC, DOCX, PDF, JPG, PNG, PSD, AI (Maks. 50MB)';
             } else if (selectedFiles.length === 1) {
                 const file = selectedFiles[0];
                 fileInfo.innerHTML = `<p>File terpilih: <strong>${file.name}</strong> (${formatFileSize(file.size)})</p>`;

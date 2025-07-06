@@ -203,6 +203,7 @@
                 spinner.classList.remove('d-none');
                 status.classList.remove('d-none');
                 status.textContent = 'Sedang menginstal pembaruan, mohon tunggu...';
+                status.classList.remove('text-danger', 'text-success');
 
                 fetch('{{ route('update.install') }}', {
                     method: 'POST',
@@ -210,16 +211,21 @@
                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     }
                 })
-                .then(res => res.json())
-                .then(data => {
+                .then(async res => {
+                    let data;
+                    try {
+                        data = await res.json();
+                    } catch (e) {
+                        throw new Error('Response bukan JSON yang valid');
+                    }
+
                     spinner.classList.add('d-none');
+                    console.log(data);
                     status.textContent = data.message;
 
                     if (data.success) {
                         status.classList.add('text-success');
-                        setTimeout(() => {
-                            location.reload();
-                        }, 3000);
+                        setTimeout(() => location.reload(), 3000);
                     } else {
                         status.classList.add('text-danger');
                         btn.disabled = false;
@@ -231,7 +237,7 @@
                     status.classList.add('text-danger');
                     status.textContent = 'Terjadi kesalahan saat instalasi.';
                     btn.disabled = false;
-                    console.error(error);
+                    console.error('ERROR SAAT FETCH:', error);
                 });
             }
         });

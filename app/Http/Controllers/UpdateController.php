@@ -136,7 +136,10 @@ class UpdateController extends Controller
         try {
             $this->copyAll($extractedPath, base_path());
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Gagal menyalin file update.']);
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menyalin file update: ' . $e->getMessage()
+            ]);
         }
 
         // Step 6: Hapus file zip dan tmp
@@ -166,11 +169,24 @@ class UpdateController extends Controller
         );
 
         foreach ($files as $file) {
-            $targetPath = $destination . DIRECTORY_SEPARATOR . $file->getSubPathName();
+            $sourcePath = $file->getRealPath();
+            $relativePath = str_replace($source . DIRECTORY_SEPARATOR, '', $sourcePath);
+            $targetPath = $destination . DIRECTORY_SEPARATOR . $relativePath;
+
             if ($file->isDir()) {
-                @mkdir($targetPath, 0755, true);
+                if (!is_dir($targetPath)) {
+                    mkdir($targetPath, 0755, true);
+                }
             } else {
-                copy($file, $targetPath);
+                // Pastikan direktori target ada sebelum copy file
+                $targetDir = dirname($targetPath);
+                if (!is_dir($targetDir)) {
+                    mkdir($targetDir, 0755, true);
+                }
+
+                if (!@copy($sourcePath, $targetPath)) {
+                    throw new \Exception("Gagal menyalin file: {$relativePath}");
+                }
             }
         }
     }

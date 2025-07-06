@@ -13,7 +13,7 @@ class UpdateController extends Controller
 {
     public function check()
     {
-        $currentVersion = config('app.version'); // atau ambil dari DB
+        $currentVersion = AppSetting::get('app_version', '1.0.0');
         $versionUrl = 'https://raw.githubusercontent.com/kholif18/rc-app/main/version.json';
 
         try {
@@ -28,7 +28,7 @@ class UpdateController extends Controller
                 // Simpan update_url dan app_version jika ada update
                 if ($updateAvailable) {
                     AppSetting::set('update_url', $data['url']);
-                    AppSetting::set('app_version', $latestVersion);
+                    // AppSetting::set('app_version', $latestVersion);
                 }
 
                 return response()->json([

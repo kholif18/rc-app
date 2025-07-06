@@ -105,7 +105,7 @@ class OrderController extends Controller
 
         $request->validate([
             'customer_id' => 'required|exists:customers,id',
-            'order_files.*' => 'nullable|file|max:204840',
+            'order_files.*' => 'nullable|file|max:51200',
             'deadline' => 'required|date',
             'estimateTime' => 'required|integer',
             'status' => 'required|string',
@@ -271,7 +271,7 @@ class OrderController extends Controller
             'priority'        => 'required|string',
             'specialNotes'    => 'nullable|string',
             'order_files'     => 'nullable|array',
-            'order_files.*'   => 'file|max:20480',
+            'order_files.*'   => 'file|max:51200',
             'existing_files'  => 'nullable|array',
             'deleted_files'   => 'nullable|array',
         ]);

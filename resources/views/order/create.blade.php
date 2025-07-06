@@ -104,7 +104,7 @@
                     <div id="fileUploadArea" class="file-upload-area">
                         <i class="bx bx-cloud-upload fa-3x mb-3 text-muted"></i>
                         <h5>Seret file ke sini atau klik untuk memilih</h5>
-                        <p id="file-info" class="text-muted">Format file: DOC, DOCX, PDF, JPG, PNG, PSD, AI (Maks. 10MB)</p>
+                        <p id="file-info" class="text-muted">Format file: DOC, DOCX, PDF, JPG, PNG, PSD, AI (Maks. 50MB)</p>
                         <input type="file" id="fileInput" name="order_files[]" multiple style="display: none;">
                     </div>
                     <div id="filePreview" class="file-preview">
@@ -347,7 +347,7 @@
         let selectedFiles = [];
 
         const validExtensions = ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png', 'psd', 'ai'];
-        const maxFileSize = 10 * 1024 * 1024; // 10MB
+        const maxFileSize = 50 * 1024 * 1024; // 10MB
 
         // Event klik upload area
         fileUploadArea.addEventListener('click', () => fileInput.click());

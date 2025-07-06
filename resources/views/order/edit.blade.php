@@ -47,7 +47,7 @@
                     <div id="fileUploadArea" class="file-upload-area">
                         <i class="bx bx-cloud-upload fa-3x mb-3 text-muted"></i>
                         <h5>Seret file ke sini atau klik untuk memilih</h5>
-                        <p id="file-info" class="text-muted">Format file: DOC, DOCX, PDF, JPG, PNG, PSD, AI (Maks. 10MB)</p>
+                        <p id="file-info" class="text-muted">Format file: DOC, DOCX, PDF, JPG, PNG, PSD, AI (Maks. 50MB)</p>
                         <input type="file" id="fileInput" name="order_files[]" multiple style="display: none;">
                     </div>
                     <div id="filePreview" class="file-preview">
@@ -519,7 +519,7 @@
             }
             document.getElementById('orderForm').addEventListener('submit', function (e) {
                 const totalSize = selectedFiles.reduce((acc, file) => acc + file.size, 0);
-                const maxTotalSize = 10 * 1024 * 1024; // max total size 10MB
+                const maxTotalSize = 50 * 1024 * 1024; // max total size 10MB
 
                 if (totalSize > maxTotalSize) {
                     e.preventDefault();

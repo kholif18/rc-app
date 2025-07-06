@@ -15,5 +15,7 @@ class DatabaseSeeder extends Seeder
             AdminSeeder::class,
             MessageTemplateSeeder::class,
         ]);
+
+        $this->call(AppSettingSeeder::class);
     }
 }

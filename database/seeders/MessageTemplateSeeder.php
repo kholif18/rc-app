@@ -16,33 +16,28 @@ class MessageTemplateSeeder extends Seeder
         $templates = [
             [
                 'name' => 'order_ready',
-                'title' => 'Pesanan Selesai',
-                'content' => 'Halo {{name}}, pesanan Anda dengan nomor #{{order_number}} untuk layanan {{services}} telah selesai dan siap diambil. Silakan ambil sebelum {{deadline}}. Terima kasih telah menggunakan layanan kami!',
+                'title' => 'Pemberitahuan Pesanan Selesai',
+                'content' => "Yth. [name],\nPesanan Anda dengan nomor #[order_number] untuk layanan [services] telah selesai dan siap untuk diambil.\nMohon untuk mengambilnya sebelum tanggal [deadline].\nTerima kasih atas kepercayaan Anda menggunakan layanan kami.",
             ],
             [
                 'name' => 'order_progress',
-                'title' => 'Pesanan Sedang Dikerjakan',
-                'content' => 'Halo {{name}}, pesanan #{{order_number}} Anda sedang dalam proses pengerjaan oleh tim kami. Kami akan memberi tahu Anda kembali setelah selesai.',
+                'title' => 'Status Pesanan: Sedang Diproses',
+                'content' => "Yth. [name],\nPesanan Anda dengan nomor #[order_number] saat ini sedang dalam proses pengerjaan oleh tim kami.\nKami akan segera memberikan informasi lebih lanjut setelah pesanan selesai diproses.",
             ],
             [
                 'name' => 'order_late',
-                'title' => 'Pesanan Terlambat Diambil',
-                'content' => 'Halo {{name}}, kami ingin mengingatkan bahwa pesanan Anda #{{order_number}} belum diambil hingga batas waktu {{deadline}}. Silakan hubungi kami jika ada kendala.',
+                'title' => 'Pemberitahuan Keterlambatan Pengambilan Pesanan',
+                'content' => "Yth. [name],\nKami ingin menginformasikan bahwa pesanan Anda dengan nomor #[order_number] belum diambil hingga batas waktu yang telah ditentukan, yaitu [deadline].\nJika terdapat kendala, silakan hubungi kami segera.",
             ],
             [
                 'name' => 'order_cancelled',
-                'title' => 'Pesanan Dibatalkan',
-                'content' => 'Halo {{name}}, pesanan Anda #{{order_number}} telah dibatalkan. Jika ini tidak sesuai, silakan hubungi tim kami untuk konfirmasi lebih lanjut.',
+                'title' => 'Pemberitahuan Pembatalan Pesanan',
+                'content' => "Yth. [name],\nPesanan Anda dengan nomor #[order_number] telah dibatalkan.\nApabila Anda merasa ini merupakan kesalahan, silakan hubungi tim kami untuk konfirmasi lebih lanjut.",
             ],
             [
                 'name' => 'order_reminder',
                 'title' => 'Pengingat Pengambilan Pesanan',
-                'content' => 'Hai {{name}}, ini adalah pengingat bahwa pesanan Anda #{{order_number}} siap diambil. Mohon segera diambil sebelum {{deadline}}. Terima kasih!',
-            ],
-            [
-                'name' => 'order_new',
-                'title' => 'Pesanan Baru Diterima',
-                'content' => 'Halo {{name}}, kami telah menerima pesanan baru Anda dengan nomor #{{order_number}}. Tim kami akan segera memproses layanan {{services}} yang Anda pilih.',
+                'content' => "Yth. [name],\nIni merupakan pengingat bahwa pesanan Anda dengan nomor #[order_number] telah selesai dan siap diambil.\nMohon untuk mengambil pesanan tersebut sebelum tanggal [deadline].\nTerima kasih atas perhatian Anda.",
             ],
         ];
 
